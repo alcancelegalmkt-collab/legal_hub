@@ -5,6 +5,9 @@ import dotenv from 'dotenv';
 import { sequelize } from './models';
 import authRoutes from './routes/authRoutes';
 import leadRoutes from './routes/leadRoutes';
+import clientRoutes from './routes/clientRoutes';
+import caseRoutes from './routes/caseRoutes';
+import documentRoutes from './routes/documentRoutes';
 import whatsappRoutes from './routes/whatsappRoutes';
 import { initializeWhatsApp } from './services/whatsappService';
 
@@ -34,6 +37,9 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/cases', caseRoutes);
+app.use('/api/documents', documentRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 
 // Database sync and start server

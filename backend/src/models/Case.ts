@@ -135,4 +135,12 @@ Case.init(
 Case.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
 Case.belongsTo(User, { as: 'lawyer', foreignKey: 'primaryLawyerId' });
 
+// Relacionamento com Documents
+const setupCaseAssociations = () => {
+  const Document = require('./Document').default;
+  Case.hasMany(Document, { as: 'documents', foreignKey: 'caseId' });
+};
+
+setTimeout(setupCaseAssociations, 150);
+
 export default Case;
