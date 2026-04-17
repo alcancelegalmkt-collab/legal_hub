@@ -1,0 +1,138 @@
+import { DataTypes, Model, Optional, ForeignKey } from 'sequelize';
+import sequelize from '../config/database';
+import User from './User';
+
+interface ClientAttributes {
+  id: number;
+  name: string;
+  cpfCnpj: string;
+  email: string;
+  phone: string;
+  whatsapp: string;
+  maritalStatus: string;
+  profession: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  rg: string;
+  nationality: string;
+  needsFinancialAid: boolean;
+  primaryLawyerId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ClientCreationAttributes extends Optional<ClientAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+
+class Client extends Model<ClientAttributes, ClientCreationAttributes> implements ClientAttributes {
+  public id!: number;
+  public name!: string;
+  public cpfCnpj!: string;
+  public email!: string;
+  public phone!: string;
+  public whatsapp!: string;
+  public maritalStatus!: string;
+  public profession!: string;
+  public address!: string;
+  public city!: string;
+  public state!: string;
+  public zipCode!: string;
+  public rg!: string;
+  public nationality!: string;
+  public needsFinancialAid!: boolean;
+  public primaryLawyerId!: number;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
+
+Client.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    cpfCnpj: {
+      type: DataTypes.STRING(20),
+      unique: true,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    phone: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    whatsapp: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    maritalStatus: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    profession: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING(2),
+      allowNull: true,
+    },
+    zipCode: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },
+    rg: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    nationality: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    needsFinancialAid: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    primaryLawyerId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: User,
+        key: 'id',
+      },
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    sequelize,
+    tableName: 'clients',
+  }
+);
+
+Client.belongsTo(User, { as: 'lawyer', foreignKey: 'primaryLawyerId' });
+
+export default Client;
