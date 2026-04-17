@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Banco de dados principal
+  postgres:
+    image: postgres:15-alpine
+    container_name: legal-hub-postgres
+    environment:
+      POSTGRES_USER: legal_user
+      POSTGRES_PASSWORD: legal_password_dev
+      POSTGRES_DB: legal_hub
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legal_user -d legal_hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legal-hub-network
+
+  # Redis - Cache e filas
+  redis:
+    image: redis:7-alpine
+    container_name: legal-hub-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legal-hub-network
+
+  # n8n - Orquestração de workflows
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: legal-hub-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgres
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: legal_user
+      DB_POSTGRESDB_PASSWORD: legal_password_dev
+      DB_POSTGRESDB_DATABASE: n8n_db
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: admin_password_dev
+      N8N_HOST: "0.0.0.0"
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://localhost:5678/
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/n8n-workflows
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - legal-hub-network
+
+  # PgAdmin - Interface web para PostgreSQL (opcional, para desenvolvimento)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: legal-hub-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@legal-hub.local
+      PGADMIN_DEFAULT_PASSWORD: admin_password_dev
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - legal-hub-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  n8n_data:
+
+networks:
+  legal-hub-network:
+    driver: bridge
