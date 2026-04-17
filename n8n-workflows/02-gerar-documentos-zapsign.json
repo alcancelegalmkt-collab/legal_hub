@@ -1,0 +1,362 @@
+{
+  "name": "02 - Gerar Documentos → ZapSign",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/gerar-docs",
+        "method": "POST",
+        "options": {}
+      },
+      "name": "Webhook - Solicitar Documentos",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://localhost:3000/api/clients/{{ $node[\"Webhook - Solicitar Documentos\"].json.body.clientId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        }
+      },
+      "name": "Buscar Dados Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "method": "POST",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-3-sonnet-20240229"
+            },
+            {
+              "name": "max_tokens",
+              "value": "2000"
+            },
+            {
+              "name": "system",
+              "value": "Você é um especialista em documentação jurídica. Gere documentos profissionais em formato de texto. Inclua claúsulas padrão e adaptáveis."
+            },
+            {
+              "name": "messages",
+              "value": "[{\"role\":\"user\",\"content\":\"Gere um contrato de prestação de serviços jurídicos para: Nome: {{ $node[\\\"Buscar Dados Cliente\\\"].json.name }}, CPF: {{ $node[\\\"Buscar Dados Cliente\\\"].json.cpfCnpj }}, Endereço: {{ $node[\\\"Buscar Dados Cliente\\\"].json.address }}, Valor honorários: {{ $node[\\\"Webhook - Solicitar Documentos\\\"].json.body.honorariesFee }}\"}]"
+            }
+          ]
+        }
+      },
+      "name": "Gerar Contrato IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "method": "POST",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-3-haiku-20240307"
+            },
+            {
+              "name": "max_tokens",
+              "value": "1500"
+            },
+            {
+              "name": "system",
+              "value": "Gere uma proposta de honorários profissional em formato texto."
+            },
+            {
+              "name": "messages",
+              "value": "[{\"role\":\"user\",\"content\":\"Proposta para: {{ $node[\\\"Buscar Dados Cliente\\\"].json.name }}, Valor: {{ $node[\\\"Webhook - Solicitar Documentos\\\"].json.body.honorariesFee }}, Tipo: {{ $node[\\\"Webhook - Solicitar Documentos\\\"].json.body.honorariesFeeType }}\"}]"
+            }
+          ]
+        }
+      },
+      "name": "Gerar Proposta IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:3000/api/documents",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "clientId",
+              "value": "={{ $node[\"Webhook - Solicitar Documentos\"].json.body.clientId }}"
+            },
+            {
+              "name": "caseId",
+              "value": "={{ $node[\"Webhook - Solicitar Documentos\"].json.body.caseId }}"
+            },
+            {
+              "name": "type",
+              "value": "contract"
+            },
+            {
+              "name": "title",
+              "value": "Contrato de Prestação de Serviços"
+            },
+            {
+              "name": "fileName",
+              "value": "=Contrato_{{ $node[\"Buscar Dados Cliente\"].json.cpfCnpj }}_{{ $now.toFormat('yyyyMMdd') }}.docx"
+            },
+            {
+              "name": "filePath",
+              "value": "=/documents/contratos/{{ $node[\"Buscar Dados Cliente\"].json.cpfCnpj }}.docx"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            }
+          ]
+        }
+      },
+      "name": "Salvar Contrato CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:3000/api/documents",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "clientId",
+              "value": "={{ $node[\"Webhook - Solicitar Documentos\"].json.body.clientId }}"
+            },
+            {
+              "name": "type",
+              "value": "proposal"
+            },
+            {
+              "name": "title",
+              "value": "Proposta de Honorários"
+            },
+            {
+              "name": "fileName",
+              "value": "=Proposta_{{ $node[\"Buscar Dados Cliente\"].json.cpfCnpj }}_{{ $now.toFormat('yyyyMMdd') }}.docx"
+            },
+            {
+              "name": "filePath",
+              "value": "=/documents/propostas/{{ $node[\"Buscar Dados Cliente\"].json.cpfCnpj }}.docx"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            }
+          ]
+        }
+      },
+      "name": "Salvar Proposta CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://api.zapsign.com.br/api/v1/docs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "method": "POST",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.ZAPSIGN_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "Contrato - {{ $node[\"Buscar Dados Cliente\"].json.name }}"
+            },
+            {
+              "name": "signers",
+              "value": "[{\"email\":\"{{ $node[\"Buscar Dados Cliente\"].json.email }}\",\"name\":\"{{ $node[\"Buscar Dados Cliente\"].json.name }}\"}]"
+            }
+          ]
+        }
+      },
+      "name": "Upload Contrato ZapSign",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1150, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.zapsign.com.br/api/v1/docs",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "method": "POST",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.ZAPSIGN_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "Proposta - {{ $node[\"Buscar Dados Cliente\"].json.name }}"
+            },
+            {
+              "name": "signers",
+              "value": "[{\"email\":\"{{ $node[\"Buscar Dados Cliente\"].json.email }}\",\"name\":\"{{ $node[\"Buscar Dados Cliente\"].json.name }}\"}]"
+            }
+          ]
+        }
+      },
+      "name": "Upload Proposta ZapSign",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1150, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Solicitar Documentos": {
+      "main": [
+        [
+          {
+            "node": "Buscar Dados Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Cliente": {
+      "main": [
+        [
+          {
+            "node": "Gerar Contrato IA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gerar Proposta IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Contrato IA": {
+      "main": [
+        [
+          {
+            "node": "Salvar Contrato CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Contrato ZapSign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Proposta IA": {
+      "main": [
+        [
+          {
+            "node": "Salvar Proposta CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Proposta ZapSign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

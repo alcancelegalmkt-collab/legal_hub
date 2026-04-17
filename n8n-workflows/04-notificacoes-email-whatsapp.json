@@ -1,0 +1,171 @@
+{
+  "name": "04 - Sistema de Notificações Email + WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/notify",
+        "method": "POST",
+        "options": {}
+      },
+      "name": "Webhook Notificação",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "condition": "is",
+              "leftValue": "={{ $node[\"Webhook Notificação\"].json.body.type }}",
+              "rightValue": "email"
+            }
+          ]
+        }
+      },
+      "name": "Se Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "condition": "is",
+              "leftValue": "={{ $node[\"Webhook Notificação\"].json.body.type }}",
+              "rightValue": "whatsapp"
+            }
+          ]
+        }
+      },
+      "name": "Se WhatsApp",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 450]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Webhook Notificação\"].json.body.recipientEmail }}",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "smtpCredentials",
+        "options": {
+          "fromEmail": "{{ $env.SMTP_FROM }}",
+          "toEmail": "={{ $node[\"Webhook Notificação\"].json.body.recipientEmail }}",
+          "subject": "={{ $node[\"Webhook Notificação\"].json.body.subject }}",
+          "html": "={{ $node[\"Webhook Notificação\"].json.body.htmlContent }}"
+        }
+      },
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.twilio.com/2010-04-01/Accounts/{{ $env.TWILIO_ACCOUNT_SID }}/Messages.json",
+        "method": "POST",
+        "authentication": "basicAuth",
+        "basicAuth": {
+          "user": "{{ $env.TWILIO_ACCOUNT_SID }}",
+          "password": "{{ $env.TWILIO_AUTH_TOKEN }}"
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "{{ $env.TWILIO_WHATSAPP_FROM }}"
+            },
+            {
+              "name": "To",
+              "value": "=whatsapp:{{ $node[\"Webhook Notificação\"].json.body.recipientWhatsApp }}"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $node[\"Webhook Notificação\"].json.body.textContent }}"
+            }
+          ]
+        }
+      },
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 450]
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  status: 'notification_sent',\n  type: $input.all()[0].json.body.type,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "name": "Confirmar Envio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Notificação": {
+      "main": [
+        [
+          {
+            "node": "Se Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Se WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se Email": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Envio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

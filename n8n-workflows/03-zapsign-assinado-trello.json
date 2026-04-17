@@ -1,0 +1,173 @@
+{
+  "name": "03 - ZapSign Assinado → CRM + Trello",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/zapsign-signed",
+        "method": "POST",
+        "options": {}
+      },
+      "name": "Webhook ZapSign - Assinado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=http://localhost:3000/api/documents/{{ $node[\"Webhook ZapSign - Assinado\"].json.body.documentId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "signed"
+            },
+            {
+              "name": "signedAt",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "zapsignId",
+              "value": "={{ $node[\"Webhook ZapSign - Assinado\"].json.body.zapsignId }}"
+            },
+            {
+              "name": "signedBy",
+              "value": "={{ $node[\"Webhook ZapSign - Assinado\"].json.body.signedBy }}"
+            }
+          ]
+        }
+      },
+      "name": "Atualizar Status CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=http://localhost:3000/api/clients/{{ $node[\"Webhook ZapSign - Assinado\"].json.body.clientId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        }
+      },
+      "name": "Buscar Dados Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 450]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.trello.com/1/cards",
+        "method": "POST",
+        "qs": [
+          {
+            "name": "idList",
+            "value": "={{ $env.TRELLO_LIST_ID }}"
+          },
+          {
+            "name": "key",
+            "value": "={{ $env.TRELLO_API_KEY }}"
+          },
+          {
+            "name": "token",
+            "value": "={{ $env.TRELLO_TOKEN }}"
+          }
+        ],
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "=📋 {{ $node[\"Buscar Dados Cliente\"].json.name }}"
+            },
+            {
+              "name": "desc",
+              "value": "=**Cliente**: {{ $node[\"Buscar Dados Cliente\"].json.name }}\\n**CPF/CNPJ**: {{ $node[\"Buscar Dados Cliente\"].json.cpfCnpj }}\\n**Email**: {{ $node[\"Buscar Dados Cliente\"].json.email }}\\n**Telefone**: {{ $node[\"Buscar Dados Cliente\"].json.phone }}\\n**Endereço**: {{ $node[\"Buscar Dados Cliente\"].json.address }}, {{ $node[\"Buscar Dados Cliente\"].json.city }} - {{ $node[\"Buscar Dados Cliente\"].json.state }}\\n\\n**Documento Assinado**: {{ $node[\"Webhook ZapSign - Assinado\"].json.body.documentType }}\\n**Data**: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}"
+            },
+            {
+              "name": "idLabels",
+              "value": "{{ $node[\"Webhook ZapSign - Assinado\"].json.body.legalArea }}"
+            }
+          ]
+        }
+      },
+      "name": "Criar Card Trello",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Buscar Dados Cliente\"].json.email }}",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "smtpCredentials",
+        "options": {
+          "fromEmail": "{{ $env.SMTP_FROM }}",
+          "toEmail": "{{ $node[\"Buscar Dados Cliente\"].json.email }}",
+          "subject": "Documento Assinado ✅ | Legal Hub",
+          "text": "Seu documento foi assinado com sucesso!",
+          "html": "<h2>Documento Assinado com Sucesso ✅</h2><p>Olá {{ $node[\"Buscar Dados Cliente\"].json.name }},</p><p>Seu documento foi assinado com sucesso em {{ $now.toFormat('dd/MM/yyyy HH:mm') }}.</p><p>Tipo de documento: <strong>{{ $node[\"Webhook ZapSign - Assinado\"].json.body.documentType }}</strong></p><p>Em breve você receberá as próximas orientações.</p><p>Atenciosamente,<br>Legal Hub</p>"
+        }
+      },
+      "name": "Enviar Email Notificação",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [850, 450]
+    }
+  ],
+  "connections": {
+    "Webhook ZapSign - Assinado": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Status CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar Dados Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Dados Cliente": {
+      "main": [
+        [
+          {
+            "node": "Criar Card Trello",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar Email Notificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

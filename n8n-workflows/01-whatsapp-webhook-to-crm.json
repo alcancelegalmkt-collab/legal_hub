@@ -1,0 +1,214 @@
+{
+  "name": "01 - WhatsApp → Triagem Automática → CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/whatsapp",
+        "method": "POST",
+        "options": {}
+      },
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:3000/api/leads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $node[\"Extract Lead Data\"].json.contactName }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $node[\"Extract Lead Data\"].json.email || 'unknown@whatsapp.local' }}"
+            },
+            {
+              "name": "whatsapp",
+              "value": "={{ $node[\"Webhook WhatsApp\"].json.body.from }}"
+            },
+            {
+              "name": "legalArea",
+              "value": "={{ $node[\"Triagem IA\"].json.legalArea }}"
+            },
+            {
+              "name": "description",
+              "value": "={{ $node[\"Webhook WhatsApp\"].json.body.body }}"
+            },
+            {
+              "name": "urgency",
+              "value": "={{ $node[\"Triagem IA\"].json.urgency }}"
+            },
+            {
+              "name": "aiQualificationScore",
+              "value": "={{ $node[\"Triagem IA\"].json.qualificationScore }}"
+            },
+            {
+              "name": "source",
+              "value": "whatsapp"
+            },
+            {
+              "name": "status",
+              "value": "new"
+            }
+          ]
+        }
+      },
+      "name": "Criar Lead no CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const message = $input.all()[0].json.body.body;\nconst contactName = $input.all()[0].json.body.from;\n\nreturn {\n  contactName: contactName,\n  messageContent: message,\n  email: 'unknown@whatsapp.local'\n};"
+      },
+      "name": "Extract Lead Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 200]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "method": "POST",
+        "specifyHeaders": "json",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $env.ANTHROPIC_API_KEY }}"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-3-haiku-20240307"
+            },
+            {
+              "name": "max_tokens",
+              "value": "500"
+            },
+            {
+              "name": "system",
+              "value": "Você é um assistente jurídico especializado em triagem de casos. Analise a mensagem do cliente e extraia: 1) Área jurídica (trabalhista, família, civil, penal, administrativo), 2) Urgência (low, medium, high), 3) Score de qualificação (0-100). Responda em JSON."
+            },
+            {
+              "name": "messages",
+              "value": "[{\"role\":\"user\",\"content\":\"{{ $node[\\\"Extract Lead Data\\\"].json.messageContent }}\"}]"
+            }
+          ]
+        }
+      },
+      "name": "Triagem IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "try {\n  const response = $input.all()[0].json.content[0].text;\n  const parsed = JSON.parse(response);\n  \n  return {\n    legalArea: parsed.legalArea || 'civil',\n    urgency: parsed.urgency || 'medium',\n    qualificationScore: parsed.score || 50\n  };\n} catch(e) {\n  return {\n    legalArea: 'civil',\n    urgency: 'medium',\n    qualificationScore: 50\n  };\n}"
+      },
+      "name": "Parse IA Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node[\"Webhook WhatsApp\"].json.body.from }}",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Obrigado por entrar em contato! 👋 Recebemos sua mensagem e um de nossos advogados(as) entrará em contato em breve. Sua solicitação foi registrada como {{ $node[\\\"Triagem IA\\\"].json.legalArea }}."
+            }
+          ]
+        }
+      },
+      "name": "Enviar Resposta WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1150, 400]
+    }
+  ],
+  "connections": {
+    "Webhook WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Extract Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Triagem IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triagem IA": {
+      "main": [
+        [
+          {
+            "node": "Parse IA Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse IA Response": {
+      "main": [
+        [
+          {
+            "node": "Criar Lead no CRM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar Resposta WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
