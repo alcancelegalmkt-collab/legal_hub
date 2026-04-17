@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { sequelize } from './models';
 import authRoutes from './routes/authRoutes';
 import leadRoutes from './routes/leadRoutes';
+import whatsappRoutes from './routes/whatsappRoutes';
+import { initializeWhatsApp } from './services/whatsappService';
 
 dotenv.config();
 
@@ -32,6 +34,7 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 
 // Database sync and start server
 (async () => {
@@ -47,6 +50,14 @@ app.use('/api/leads', leadRoutes);
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📚 API Health Check: http://localhost:${PORT}/api/health`);
     });
+
+    // Inicializar WhatsApp (não bloqueia o servidor)
+    setTimeout(() => {
+      console.log('\n📱 Iniciando WhatsApp...');
+      initializeWhatsApp().catch((err) => {
+        console.error('⚠️ Erro ao inicializar WhatsApp:', err);
+      });
+    }, 2000);
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
