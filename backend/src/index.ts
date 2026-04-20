@@ -8,6 +8,7 @@ import path from 'path';
 import { sequelize } from './models';
 import authRoutes from './routes/authRoutes';
 import leadRoutes from './routes/leadRoutes';
+import leadCompleteRoutes from './routes/leadCompleteRoutes';
 import clientRoutes from './routes/clientRoutes';
 import caseRoutes from './routes/caseRoutes';
 import documentRoutes from './routes/documentRoutes';
@@ -52,6 +53,7 @@ app.get('/api/health', (_req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/leads', leadCompleteRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/documents', documentRoutes);
