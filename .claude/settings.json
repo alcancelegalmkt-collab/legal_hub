@@ -14,7 +14,21 @@
       "Bash(git push *)",
       "Bash(npm run *)",
       "Bash(npx tsc *)",
-      "Bash(git commit -m 'Fix: Resolve all TypeScript compilation errors in backend *)"
+      "Bash(git commit -m 'Fix: Resolve all TypeScript compilation errors in backend *)",
+      "Bash(npm start *)",
+      "Bash(killall node *)",
+      "Bash(rm -f legal_hub.sqlite)",
+      "Bash(curl -s http://localhost:3000/api/health)",
+      "Bash(ssh -p 65002 u528898188@147.93.38.211)",
+      "Bash(ssh -o StrictHostKeyChecking=no -p 65002 u528898188@147.93.38.211 'ls -la && pwd && cat .env 2>/dev/null || echo \"No .env file\"')",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 65002 u528898188@147.93.38.211 'ls -la')",
+      "Read(//home/u528898188/domains/sistema.advogadaleliciabarros.com.br/public_html/.builds/source/legal_hub-master/**)",
+      "Read(//home/**)",
+      "Bash(curl -s http://localhost:3000/health)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/api/auth/register -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test User\",\"email\":\"test@example.com\",\"password\":\"123456\"}')",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(netstat -tuln)"
     ]
   }
 }
