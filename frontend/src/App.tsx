@@ -4,6 +4,11 @@ import useAuthStore from './store/authStore';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Leads from './pages/Leads';
+import Clients from './pages/Clients';
+import Cases from './pages/Cases';
+import Documents from './pages/Documents';
+import Monitoring from './pages/Monitoring';
+import EscavadorDashboard from './pages/EscavadorDashboard';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -50,41 +55,27 @@ const App: React.FC = () => {
         {/* Placeholder routes for future pages */}
         <Route
           path="/clients"
-          element={
-            <ProtectedRoute
-              element={
-                <div className="flex items-center justify-center h-screen">
-                  <h1 className="text-2xl text-gray-500">Página de Clientes em desenvolvimento</h1>
-                </div>
-              }
-            />
-          }
+          element={<ProtectedRoute element={<Clients />} />}
         />
 
         <Route
           path="/cases"
-          element={
-            <ProtectedRoute
-              element={
-                <div className="flex items-center justify-center h-screen">
-                  <h1 className="text-2xl text-gray-500">Página de Casos em desenvolvimento</h1>
-                </div>
-              }
-            />
-          }
+          element={<ProtectedRoute element={<Cases />} />}
         />
 
         <Route
           path="/documents"
-          element={
-            <ProtectedRoute
-              element={
-                <div className="flex items-center justify-center h-screen">
-                  <h1 className="text-2xl text-gray-500">Página de Documentos em desenvolvimento</h1>
-                </div>
-              }
-            />
-          }
+          element={<ProtectedRoute element={<Documents />} />}
+        />
+
+        <Route
+          path="/monitoring"
+          element={<ProtectedRoute element={<Monitoring />} />}
+        />
+
+        <Route
+          path="/escavador"
+          element={<ProtectedRoute element={<EscavadorDashboard />} />}
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />

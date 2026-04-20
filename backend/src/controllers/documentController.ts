@@ -269,7 +269,7 @@ export const getDocumentsByClient = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getDocumentStats = async (req: AuthRequest, res: Response) => {
+export const getDocumentStats = async (_req: AuthRequest, res: Response) => {
   try {
     const stats = await Document.findAll({
       attributes: [

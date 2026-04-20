@@ -1,0 +1,201 @@
+{
+  "name": "Gerar Documentos Automaticamente (Lead → Cliente)",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "lead_converted_to_client"
+      },
+      "name": "Trigger: Lead Convertido",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/clients/{{ $json.clientId }}",
+        "authentication": "bearerToken",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Fetch: Dados do Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [300, 300],
+      "credentials": {
+          "httpHeaderAuth": {
+            "id": "legal_hub_jwt_token",
+            "name": "Legal Hub JWT"
+          }
+        }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/documents/generate",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "clientId": "={{ $json.clientId }}",
+          "documentType": "proposal"
+        }
+      },
+      "name": "Generate: Proposta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/documents/generate",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "clientId": "={{ $json.clientId }}",
+          "documentType": "contract"
+        }
+      },
+      "name": "Generate: Contrato",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/documents/generate",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "clientId": "={{ $json.clientId }}",
+          "documentType": "power_of_attorney"
+        }
+      },
+      "name": "Generate: Procuração",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/documents/generate",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "clientId": "={{ $json.clientId }}",
+          "documentType": "financial_aid_declaration"
+        }
+      },
+      "name": "Generate: Declaração",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 500]
+    },
+    {
+      "parameters": {
+        "message": "{{ $json.body.document.title }}",
+        "options": {}
+      },
+      "name": "Notify: Documentos Gerados",
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 2,
+      "position": [700, 300],
+      "credentials": {
+        "sendGridApi": {
+          "id": "sendgrid_api",
+          "name": "SendGrid API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger: Lead Convertido": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Dados do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Dados do Cliente": {
+      "main": [
+        [
+          {
+            "node": "Generate: Proposta",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate: Contrato",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate: Procuração",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate: Declaração",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate: Proposta": {
+      "main": [
+        [
+          {
+            "node": "Notify: Documentos Gerados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate: Contrato": {
+      "main": [
+        [
+          {
+            "node": "Notify: Documentos Gerados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate: Procuração": {
+      "main": [
+        [
+          {
+            "node": "Notify: Documentos Gerados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate: Declaração": {
+      "main": [
+        [
+          {
+            "node": "Notify: Documentos Gerados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "description": "Automaticamente gera 4 documentos quando um lead é convertido em cliente"
+}

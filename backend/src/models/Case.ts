@@ -1,4 +1,4 @@
-import { DataTypes, Model, Optional, ForeignKey } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import User from './User';
 import Client from './Client';
@@ -19,6 +19,9 @@ interface CaseAttributes {
   startDate: Date;
   endDate: Date | null;
   opposingParties: string;
+  processNumber?: string;
+  escavadorData?: string;
+  lastSyncedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +44,9 @@ class Case extends Model<CaseAttributes, CaseCreationAttributes> implements Case
   public startDate!: Date;
   public endDate!: Date | null;
   public opposingParties!: string;
+  public processNumber?: string;
+  public escavadorData?: string;
+  public lastSyncedAt?: Date;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -115,6 +121,18 @@ Case.init(
     },
     opposingParties: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    processNumber: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    escavadorData: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    lastSyncedAt: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
     createdAt: {

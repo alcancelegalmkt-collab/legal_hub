@@ -45,6 +45,7 @@ export const createCase = async (req: AuthRequest, res: Response) => {
       honorariesFeeType: honorariesFeeType || 'fixed',
       opposingParties,
       status: 'active',
+      startDate: new Date(),
     });
 
     return res.status(201).json(newCase);
@@ -178,7 +179,7 @@ export const deleteCase = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getCaseStats = async (req: AuthRequest, res: Response) => {
+export const getCaseStats = async (_req: AuthRequest, res: Response) => {
   try {
     const stats = await Case.findAll({
       attributes: [

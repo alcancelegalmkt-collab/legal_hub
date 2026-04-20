@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(timeout 15 npm run dev)",
+      "Bash(timeout 20 npm run dev)",
+      "Bash(timeout 30 npm run dev)",
+      "Bash(docker-compose up *)",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Fix: Resolve TypeScript compilation errors and setup SQLite for development *)"
+    ]
+  }
+}

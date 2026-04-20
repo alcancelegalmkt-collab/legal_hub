@@ -1,0 +1,209 @@
+{
+  "name": "Webhook: Documento Assinado (ZapSign)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook/zapsign"
+      },
+      "name": "Trigger: ZapSign Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/documents?zapsignId={{ $json.uuid }}",
+        "authentication": "bearerToken",
+        "options": {}
+      },
+      "name": "Fetch: Documento pelo ZapSign ID",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [300, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.status }}",
+              "value2": "completed",
+              "operation": "equals"
+            }
+          ]
+        }
+      },
+      "name": "IF: Documento Assinado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/clients/{{ $json.body.documents[0].clientId }}",
+        "authentication": "bearerToken",
+        "options": {}
+      },
+      "name": "Fetch: Dados do Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [700, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.API_BASE_URL }}/documents/{{ $json.body.documents[0].id }}",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "status": "signed",
+          "signedAt": "={{ new Date().toISOString() }}"
+        }
+      },
+      "name": "Update: Marcar como Assinado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#legal-hub",
+        "text": "✅ Documento assinado!\\nCliente: {{ $json.body.name }}\\nDocumento: {{ $json.body.documents[0].title }}\\nData: {{ $now.toLocaleString() }}"
+      },
+      "name": "Notify: Slack Assinatura",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1100, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack_webhook",
+          "name": "Slack Webhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "documentos@seuscritorio.com.br",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "✅ Documento assinado com sucesso!",
+        "htmlBody": "<html><body>\\n<h2>Sua assinatura foi registrada com sucesso!</h2>\\n<p>Cliente: <strong>{{ $json.body.name }}</strong></p>\\n<p>Documento: <strong>{{ $json.body.documents[0].title }}</strong></p>\\n<p>Data de assinatura: <strong>{{ $now.toLocaleString() }}</strong></p>\\n<p>Seu documento assinado foi arquivado e está disponível para download.</p>\\n<br/>\\n<p>Atenciosamente,<br/>{{ $env.FIRM_NAME }}</p>\\n</body></html>"
+      },
+      "name": "Email: Confirmação Assinatura",
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 2,
+      "position": [1100, 200],
+      "credentials": {
+        "sendGridApi": {
+          "id": "sendgrid_api",
+          "name": "SendGrid API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "✅ Documento *{{ $json.body.documents[0].title }}* foi assinado por {{ $json.body.name }}!\\n\\nAcesse: {{ $env.APP_URL }}/documents/{{ $json.body.documents[0].id }}"
+      },
+      "name": "WhatsApp: Notificação",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 2,
+      "position": [1100, 400],
+      "credentials": {
+        "twilioApi": {
+          "id": "twilio_api",
+          "name": "Twilio"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger: ZapSign Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Documento pelo ZapSign ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Documento pelo ZapSign ID": {
+      "main": [
+        [
+          {
+            "node": "IF: Documento Assinado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Documento Assinado?": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Dados do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Dados do Cliente": {
+      "main": [
+        [
+          {
+            "node": "Update: Marcar como Assinado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update: Marcar como Assinado": {
+      "main": [
+        [
+          {
+            "node": "Notify: Slack Assinatura",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email: Confirmação Assinatura",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp: Notificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "description": "Processa webhook do ZapSign quando documento é assinado e notifica cliente"
+}

@@ -3,7 +3,6 @@ import makeWASocket, {
   DisconnectReason,
   useMultiFileAuthState,
   WAMessage,
-  jidNormalizedUser,
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import fs from 'fs';
@@ -40,12 +39,6 @@ export const initializeWhatsApp = async () => {
     const socket = makeWASocket({
       auth: state,
       printQRInTerminal: true,
-      logger: {
-        log: (level: string, message: string) => {
-          if (level === 'error') console.error(`[WhatsApp] ${message}`);
-          if (level === 'warn') console.warn(`[WhatsApp] ${message}`);
-        },
-      },
       browser: ['Legal Hub', 'Safari', '1.0.0'],
     });
 
@@ -96,8 +89,6 @@ export const initializeWhatsApp = async () => {
     });
 
     whatsappInstance.socket = socket;
-
-    return socket;
   } catch (error) {
     console.error('❌ Erro ao inicializar WhatsApp:', error);
     setTimeout(() => initializeWhatsApp(), 5000);

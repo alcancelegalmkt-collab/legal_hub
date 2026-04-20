@@ -4,8 +4,9 @@ import Lead from './Lead';
 import Client from './Client';
 import Case from './Case';
 import Document from './Document';
+import Movimentacao from './Movimentacao';
 
-export { User, Lead, Client, Case, Document, sequelize };
+export { User, Lead, Client, Case, Document, Movimentacao, sequelize };
 
 export default {
   sequelize,
@@ -14,4 +15,5 @@ export default {
   Client,
   Case,
   Document,
+  Movimentacao,
 };

@@ -97,9 +97,13 @@ class ApiService {
     return data;
   }
 
-  async getClients(page: number = 1, limit: number = 20): Promise<{ clients: Client[]; total: number }> {
+  async getClients(
+    page: number = 1,
+    limit: number = 20,
+    search?: string
+  ): Promise<{ clients: Client[]; total: number }> {
     const { data } = await this.api.get('/clients', {
-      params: { page, limit },
+      params: { page, limit, search },
     });
     return data;
   }
@@ -114,15 +118,23 @@ class ApiService {
     return data;
   }
 
+  async deleteClient(id: number): Promise<void> {
+    await this.api.delete(`/clients/${id}`);
+  }
+
   // ===== Cases =====
   async createCase(caseData: Partial<Case>): Promise<Case> {
     const { data } = await this.api.post('/cases', caseData);
     return data;
   }
 
-  async getCases(page: number = 1, limit: number = 20): Promise<{ cases: Case[]; total: number }> {
+  async getCases(
+    page: number = 1,
+    limit: number = 20,
+    filters?: { search?: string; status?: string; clientId?: number }
+  ): Promise<{ cases: Case[]; total: number }> {
     const { data } = await this.api.get('/cases', {
-      params: { page, limit },
+      params: { page, limit, ...filters },
     });
     return data;
   }
@@ -137,16 +149,116 @@ class ApiService {
     return data;
   }
 
+  async deleteCase(id: number): Promise<void> {
+    await this.api.delete(`/cases/${id}`);
+  }
+
   // ===== Documents =====
-  async getDocuments(clientId?: number): Promise<Document[]> {
+  async createDocument(doc: Partial<Document>): Promise<Document> {
+    const { data } = await this.api.post('/documents', doc);
+    return data;
+  }
+
+  async getDocuments(
+    page: number = 1,
+    limit: number = 20,
+    filters?: { search?: string; type?: string; status?: string; clientId?: number; caseId?: number }
+  ): Promise<{ documents: Document[]; total: number }> {
     const { data } = await this.api.get('/documents', {
-      params: clientId ? { clientId } : {},
+      params: { page, limit, ...filters },
     });
     return data;
   }
 
   async getDocumentById(id: number): Promise<Document> {
     const { data } = await this.api.get(`/documents/${id}`);
+    return data;
+  }
+
+  async updateDocument(id: number, updates: Partial<Document>): Promise<Document> {
+    const { data } = await this.api.put(`/documents/${id}`, updates);
+    return data;
+  }
+
+  async deleteDocument(id: number): Promise<void> {
+    await this.api.delete(`/documents/${id}`);
+  }
+
+  async sendDocumentToSignature(id: number, signData: { zapsignId: string; zapsignSignLink: string }): Promise<Document> {
+    const { data } = await this.api.post(`/documents/${id}/send-to-signature`, signData);
+    return data;
+  }
+
+  async markDocumentAsSigned(id: number, signedData: { signedBy: string }): Promise<Document> {
+    const { data } = await this.api.post(`/documents/${id}/mark-as-signed`, signedData);
+    return data;
+  }
+
+  async generateDocumentAI(clientId: number, documentType: string, caseId?: number): Promise<any> {
+    const { data } = await this.api.post('/documents/generate', {
+      clientId,
+      documentType,
+      caseId,
+    });
+    return data;
+  }
+
+  async sendDocumentToZapSign(
+    id: number,
+    signerEmail: string,
+    signerName: string
+  ): Promise<any> {
+    const { data } = await this.api.post(`/documents/${id}/send-to-zapsign`, {
+      signerEmail,
+      signerName,
+    });
+    return data;
+  }
+
+  async checkZapSignStatus(id: number): Promise<any> {
+    const { data } = await this.api.get(`/documents/${id}/zapsign-status`);
+    return data;
+  }
+
+  async checkAllPendingSignatures(): Promise<any> {
+    const { data } = await this.api.post('/documents/check-signatures');
+    return data;
+  }
+
+  // ===== Analytics =====
+  async getDashboardMetrics(): Promise<any> {
+    const { data } = await this.api.get('/analytics/dashboard');
+    return data;
+  }
+
+  async getDocumentTrends(days: number = 30): Promise<any> {
+    const { data } = await this.api.get('/analytics/trends/documents', {
+      params: { days },
+    });
+    return data;
+  }
+
+  async getDocumentTypeBreakdown(): Promise<any> {
+    const { data } = await this.api.get('/analytics/breakdown/document-types');
+    return data;
+  }
+
+  async getCaseCompletionByArea(): Promise<any> {
+    const { data } = await this.api.get('/analytics/breakdown/case-completion');
+    return data;
+  }
+
+  async getMonthlyMetrics(month?: number, year?: number): Promise<any> {
+    const { data } = await this.api.get('/analytics/monthly', {
+      params: { month, year },
+    });
+    return data;
+  }
+
+  async exportMetricsCSV(): Promise<Blob> {
+    const { data } = await this.api.get('/analytics/export/csv', {
+      responseType: 'blob',
+    });
     return data;
   }
 }

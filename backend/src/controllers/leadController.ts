@@ -33,6 +33,8 @@ export const createLead = async (req: AuthRequest, res: Response) => {
       estimatedBudget,
       source: source || 'whatsapp',
       status: 'new',
+      aiQualificationScore: 0,
+      notes: '',
     });
 
     return res.status(201).json(lead);

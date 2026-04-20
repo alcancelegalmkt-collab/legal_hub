@@ -1,0 +1,161 @@
+{
+  "name": "Enviar para ZapSign Automaticamente",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "document_generated"
+      },
+      "name": "Trigger: Documento Gerado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/clients/{{ $json.clientId }}",
+        "authentication": "bearerToken",
+        "options": {}
+      },
+      "name": "Fetch: Dados do Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [300, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.document.type }}",
+              "value2": "proposal",
+              "operation": "equals"
+            }
+          ]
+        }
+      },
+      "name": "IF: Proposta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/documents/{{ $json.body.document.id }}/send-to-zapsign",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "signerEmail": "={{ $json.body.email }}",
+          "signerName": "={{ $json.body.name }}"
+        }
+      },
+      "name": "Action: Enviar para ZapSign",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [700, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#legal-hub",
+        "text": "📄 Documento enviado para assinatura\\nCliente: {{ $json.body.name }}\\nTipo: {{ $json.body.document.type }}\\nLink: {{ $json.body.signLink }}"
+      },
+      "name": "Notify: Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack_webhook",
+          "name": "Slack Webhook"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "documentos@seuscritorio.com.br",
+        "toEmail": "={{ $json.body.email }}",
+        "subject": "Documento pronto para assinatura",
+        "htmlBody": "<html><body>\\n<h2>Olá {{ $json.body.name }},</h2>\\n<p>Seu documento <strong>{{ $json.body.document.title }}</strong> está pronto para ser assinado.</p>\\n<p><a href='{{ $json.body.signLink }}' style='padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; display: inline-block;'>Assinar Documento</a></p>\\n<p>Caso tenha dúvidas, entre em contato.</p>\\n</body></html>"
+      },
+      "name": "Email: Convite Assinatura",
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 2,
+      "position": [900, 200],
+      "credentials": {
+        "sendGridApi": {
+          "id": "sendgrid_api",
+          "name": "SendGrid API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger: Documento Gerado": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Dados do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Dados do Cliente": {
+      "main": [
+        [
+          {
+            "node": "IF: Proposta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Proposta?": {
+      "main": [
+        [
+          {
+            "node": "Action: Enviar para ZapSign",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action: Enviar para ZapSign": {
+      "main": [
+        [
+          {
+            "node": "Email: Convite Assinatura",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify: Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "description": "Envia documento para ZapSign automaticamente e notifica cliente por email"
+}

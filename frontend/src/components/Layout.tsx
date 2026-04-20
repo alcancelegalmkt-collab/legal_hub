@@ -28,6 +28,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { icon: UsersIcon, label: 'Clientes', path: '/clients' },
     { icon: DocumentTextIcon, label: 'Casos', path: '/cases' },
     { icon: DocumentTextIcon, label: 'Documentos', path: '/documents' },
+    { icon: CogIcon, label: 'Monitoramento', path: '/monitoring' },
+    { icon: DocumentTextIcon, label: 'Processos Escavador', path: '/escavador' },
   ];
 
   return (

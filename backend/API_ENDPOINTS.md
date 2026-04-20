@@ -390,7 +390,42 @@ Authorization: Bearer <token>
 
 ## 📄 Documentos
 
-### Criar Documento
+### Gerar Documento (IA)
+
+```http
+POST /api/documents/generate
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "clientId": 1,
+  "caseId": 1,
+  "documentType": "contract"
+}
+```
+
+**Resposta (201):**
+```json
+{
+  "message": "Documento gerado com sucesso",
+  "document": {
+    "id": 1,
+    "clientId": 1,
+    "type": "contract",
+    "title": "Contrato de Prestação de Serviços Jurídicos",
+    "fileName": "contract_1_1705328400000.docx",
+    "filePath": "/uploads/documents/contract_1_1705328400000.docx",
+    "status": "draft",
+    "createdAt": "2024-01-15T10:30:00Z"
+  },
+  "content": {
+    "title": "CONTRATO DE PRESTAÇÃO DE SERVIÇOS JURÍDICOS",
+    "sections": [...]
+  }
+}
+```
+
+### Criar Documento (Manual)
 
 ```http
 POST /api/documents
@@ -454,7 +489,50 @@ Content-Type: application/json
 }
 ```
 
-### Enviar para Assinatura
+### Enviar para ZapSign (Assinatura Digital)
+
+```http
+POST /api/documents/:id/send-to-zapsign
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "signerEmail": "cliente@example.com",
+  "signerName": "João Silva"
+}
+```
+
+**Resposta (200):**
+```json
+{
+  "message": "Documento enviado para assinatura",
+  "zapsignId": "uuid-123456",
+  "signLink": "https://zapsign.com.br/sign/...",
+  "document": {
+    "id": 1,
+    "status": "pending_signature",
+    "zapsignId": "uuid-123456"
+  }
+}
+```
+
+### Verificar Status ZapSign
+
+```http
+GET /api/documents/:id/zapsign-status
+Authorization: Bearer <token>
+```
+
+**Resposta (200):**
+```json
+{
+  "documentId": 1,
+  "zapsignId": "uuid-123456",
+  "status": "pending|completed|expired|declined"
+}
+```
+
+### Enviar para Assinatura (Legacy)
 
 ```http
 POST /api/documents/:id/send-to-signature

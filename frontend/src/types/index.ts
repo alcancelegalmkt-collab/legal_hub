@@ -63,6 +63,9 @@ export interface Case {
   startDate: string;
   endDate: string | null;
   opposingParties: string;
+  processNumber?: string;
+  escavadorData?: string;
+  lastSyncedAt?: string;
   createdAt: string;
   updatedAt: string;
   client?: Client;
@@ -98,4 +101,18 @@ export interface LeadsResponse {
   page: number;
   limit: number;
   pages: number;
+}
+
+export interface Movimentacao {
+  id: number;
+  caseId: number;
+  caseName: string;
+  processNumber: string;
+  movimentationType: string;
+  description: string;
+  importance: 'low' | 'medium' | 'high' | 'critical';
+  detectedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  case?: Case;
 }

@@ -1,0 +1,172 @@
+{
+  "name": "Criar Trello Card - Documento Assinado",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "document_signed"
+      },
+      "name": "Trigger: Documento Assinado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/documents/{{ $json.documentId }}",
+        "authentication": "bearerToken",
+        "options": {}
+      },
+      "name": "Fetch: Dados do Documento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [300, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.API_BASE_URL }}/clients/{{ $json.body.clientId }}",
+        "authentication": "bearerToken",
+        "options": {}
+      },
+      "name": "Fetch: Dados do Cliente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.API_BASE_URL }}/trello/documents/card",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "documentId": "={{ $json.body.id }}",
+          "boardName": "Documentos Assinados",
+          "listName": "Concluído"
+        }
+      },
+      "name": "Action: Criar Card Trello",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [700, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.body.trelloUrl }}",
+        "authentication": "bearerToken",
+        "contentType": "application/json",
+        "body": {
+          "cardId": "={{ $json.body.card.id }}",
+          "comment": "✅ Documento assinado em {{ $now.toLocaleString() }}"
+        }
+      },
+      "name": "Action: Adicionar Comentário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "legal_hub_jwt_token",
+          "name": "Legal Hub JWT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#legal-hub",
+        "text": "📋 Trello Card criado!\\nDocumento: {{ $json.body.card.name }}\\nBoard: Documentos Assinados\\nURL: {{ $json.body.trelloUrl }}"
+      },
+      "name": "Notify: Slack - Card Criado",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1100, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "slack_webhook",
+          "name": "Slack Webhook"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger: Documento Assinado": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Dados do Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Dados do Documento": {
+      "main": [
+        [
+          {
+            "node": "Fetch: Dados do Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch: Dados do Cliente": {
+      "main": [
+        [
+          {
+            "node": "Action: Criar Card Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action: Criar Card Trello": {
+      "main": [
+        [
+          {
+            "node": "Action: Adicionar Comentário",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action: Adicionar Comentário": {
+      "main": [
+        [
+          {
+            "node": "Notify: Slack - Card Criado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "description": "Cria um Trello card quando um documento é assinado para rastreamento de tarefas"
+}

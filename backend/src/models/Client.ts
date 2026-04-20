@@ -1,5 +1,5 @@
-import { DataTypes, Model, Optional, ForeignKey } from 'sequelize';
 import sequelize from '../config/database';
+import { DataTypes, Model, Optional } from 'sequelize';
 import User from './User';
 
 interface ClientAttributes {

@@ -2,9 +2,11 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models';
 
 export const generateToken = (userId: number): string => {
+  const secret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production';
+  // @ts-ignore
   return jwt.sign(
     { userId },
-    process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production',
+    secret,
     { expiresIn: process.env.JWT_EXPIRATION || '7d' }
   );
 };
@@ -55,6 +57,7 @@ export const registerUser = async (
     password,
     oabNumber,
     role,
+    active: true,
   });
 
   const token = generateToken(user.id);

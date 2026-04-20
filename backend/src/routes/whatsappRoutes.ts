@@ -17,7 +17,7 @@ router.post('/send-bulk', whatsappController.sendBulkMessages);
 router.get('/status', whatsappController.getStatus);
 
 // Verificar se está conectado (sem auth)
-router.get('/qr-status', (req, res) => {
+router.get('/qr-status', (_req, res) => {
   res.json({
     connected: true,
     message: 'Verifique /api/whatsapp/status para mais detalhes',
