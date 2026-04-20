@@ -3,7 +3,8 @@ import Layout from '../components/Layout';
 import { Card, CardHeader, CardBody } from '../components/Card';
 import { Lead, Responsavel, Dependente } from '../types';
 import api from '../services/api';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { LeadFormMultiStep } from '../components/forms/LeadFormMultiStep';
 
 const Leads: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -161,8 +162,28 @@ const Leads: React.FC = () => {
           </button>
         </div>
 
-        {/* New Lead Form */}
+        {/* New Lead Form - Multi-Step */}
         {showForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 max-h-screen overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl my-8">
+              <div className="flex justify-between items-center p-6 border-b">
+                <h2 className="text-2xl font-bold text-gray-900">Novo Lead - Cadastro Completo</h2>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <LeadFormMultiStep />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Legacy: Old Form Removed - Keeping for Reference */}
+        {false && (
           <Card>
             <CardHeader title="Novo Lead - Pré-Cadastro de Demanda Jurídica" />
             <CardBody>
