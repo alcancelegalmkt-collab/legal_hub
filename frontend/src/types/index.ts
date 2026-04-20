@@ -1,3 +1,10 @@
+export enum HonoraryType {
+  INITIAL_SUCCESS = 'initial_success',
+  UNIQUE = 'unique',
+  SUCCESS_ONLY = 'success_only',
+  MONTHLY = 'monthly',
+}
+
 export interface User {
   id: number;
   name: string;

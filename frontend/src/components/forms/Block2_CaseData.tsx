@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LeadFormState } from '../../hooks/useLeadFormState';
-import { api } from '../../services/api';
+import api from '../../services/api';
 
 interface LegalArea {
   id: number;

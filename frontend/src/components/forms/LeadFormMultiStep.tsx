@@ -7,7 +7,7 @@ import { Block4_Honorary } from './Block4_Honorary';
 import { Block5_Proposal } from './Block5_Proposal';
 import { Block6_Acceptance } from './Block6_Acceptance';
 import { Block7_Financial } from './Block7_Financial';
-import { api } from '../../services/api';
+import api from '../../services/api';
 
 interface CaseType {
   id: number;
@@ -80,7 +80,6 @@ export const LeadFormMultiStep: React.FC = () => {
 
         // Block 4: HonoraryStructure
         honoraryStructure: {
-          honoraryType: state.block4.honoraryType,
           ...state.block4,
         },
 
