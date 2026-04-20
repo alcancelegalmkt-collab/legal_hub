@@ -45,7 +45,7 @@ export default function EscavadorDashboard() {
 
       // Carregar casos para filtro
       if (cases.length === 0) {
-        const casesRes = await api.client.get('/cases');
+        const casesRes = await api.get('/cases');
         setCases(casesRes.data.cases);
       }
 
@@ -57,8 +57,8 @@ export default function EscavadorDashboard() {
       if (filtros.dateTo) params.append('dateTo', filtros.dateTo);
 
       const [movRes, statsRes] = await Promise.all([
-        api.client.get(`/escavador/movimentacoes?${params.toString()}`),
-        api.client.get('/escavador/movimentacoes/stats'),
+        api.get(`/escavador/movimentacoes?${params.toString()}`),
+        api.get('/escavador/movimentacoes/stats'),
       ]);
 
       setMovimentacoes(movRes.data.movimentacoes);

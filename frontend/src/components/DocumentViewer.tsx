@@ -4,8 +4,7 @@ import {
   DocumentTextIcon,
   ArrowDownTrayIcon,
   ShareIcon,
-  ZoomInIcon,
-  ZoomOutIcon,
+  MagnifyingGlassIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
@@ -131,7 +130,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ documentId, onClose }) 
               onClick={handleZoomIn}
               className="control-button"
             >
-              <ZoomInIcon className="icon" />
+              <MagnifyingGlassIcon className="icon" />
             </button>
 
             <span className="zoom-label">{zoom}%</span>
@@ -141,7 +140,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ documentId, onClose }) 
               onClick={handleZoomOut}
               className="control-button"
             >
-              <ZoomOutIcon className="icon" />
+              <MagnifyingGlassIcon className="icon" />
             </button>
 
             <button

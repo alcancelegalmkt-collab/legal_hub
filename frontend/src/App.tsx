@@ -2,13 +2,9 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './store/authStore';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Leads from './pages/Leads';
 import Clients from './pages/Clients';
 import Cases from './pages/Cases';
 import Documents from './pages/Documents';
-import Monitoring from './pages/Monitoring';
-import EscavadorDashboard from './pages/EscavadorDashboard';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -38,21 +34,8 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute element={<Dashboard />} />
-          }
-        />
+        <Route path="/" element={<Navigate to="/clients" replace />} />
 
-        <Route
-          path="/leads"
-          element={
-            <ProtectedRoute element={<Leads />} />
-          }
-        />
-
-        {/* Placeholder routes for future pages */}
         <Route
           path="/clients"
           element={<ProtectedRoute element={<Clients />} />}
@@ -68,17 +51,7 @@ const App: React.FC = () => {
           element={<ProtectedRoute element={<Documents />} />}
         />
 
-        <Route
-          path="/monitoring"
-          element={<ProtectedRoute element={<Monitoring />} />}
-        />
-
-        <Route
-          path="/escavador"
-          element={<ProtectedRoute element={<EscavadorDashboard />} />}
-        />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/clients" replace />} />
       </Routes>
     </Router>
   );

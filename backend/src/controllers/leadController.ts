@@ -1,44 +1,67 @@
 import { Response } from 'express';
-import { Lead, User } from '../models';
+import { Lead, User, Responsavel, Dependente, Client } from '../models';
 import { AuthRequest } from '../middleware/auth';
 
 export const createLead = async (req: AuthRequest, res: Response) => {
   try {
     const {
-      name,
-      email,
-      phone,
-      whatsapp,
       legalArea,
-      description,
+      tipoDemanda,
+      resumoCaso,
+      objetivoCliente,
       urgency,
-      estimatedBudget,
-      source,
+      possuiDependente,
+      responsavel,
+      dependentes,
     } = req.body;
 
-    if (!name || !email || !legalArea) {
+    if (!legalArea || !tipoDemanda || !resumoCaso) {
       return res.status(400).json({
-        error: 'Name, email, and legalArea are required',
+        error: 'legalArea, tipoDemanda, and resumoCaso are required',
+      });
+    }
+
+    if (!responsavel || !responsavel.nomeCompleto || !responsavel.email) {
+      return res.status(400).json({
+        error: 'Responsavel with nomeCompleto and email is required',
       });
     }
 
     const lead = await Lead.create({
-      name,
-      email,
-      phone,
-      whatsapp,
       legalArea,
-      description,
+      tipoDemanda,
+      resumoCaso,
+      objetivoCliente: objetivoCliente || '',
       urgency: urgency || 'medium',
-      estimatedBudget,
-      source: source || 'whatsapp',
+      possuiDependente: possuiDependente || false,
       status: 'new',
-      aiQualificationScore: 0,
-      notes: '',
+      assignedToId: req.userId,
     });
 
-    return res.status(201).json(lead);
+    await Responsavel.create({
+      leadId: lead.id,
+      ...responsavel,
+    });
+
+    if (possuiDependente && dependentes && dependentes.length > 0) {
+      for (const dep of dependentes) {
+        await Dependente.create({
+          leadId: lead.id,
+          ...dep,
+        });
+      }
+    }
+
+    const fullLead = await Lead.findByPk(lead.id, {
+      include: [
+        { model: Responsavel, as: 'responsavel' },
+        { model: Dependente, as: 'dependentes' },
+      ],
+    });
+
+    return res.status(201).json(fullLead);
   } catch (error: any) {
+    console.error('Erro ao criar lead:', error);
     return res.status(400).json({
       error: error.message,
     });
@@ -61,6 +84,14 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
           model: User,
           as: 'assignedTo',
           attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: Responsavel,
+          as: 'responsavel',
+        },
+        {
+          model: Dependente,
+          as: 'dependentes',
         },
       ],
       offset,
@@ -93,6 +124,14 @@ export const getLeadById = async (req: AuthRequest, res: Response) => {
           as: 'assignedTo',
           attributes: ['id', 'name', 'email'],
         },
+        {
+          model: Responsavel,
+          as: 'responsavel',
+        },
+        {
+          model: Dependente,
+          as: 'dependentes',
+        },
       ],
     });
 
@@ -113,7 +152,7 @@ export const getLeadById = async (req: AuthRequest, res: Response) => {
 export const updateLead = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const { responsavel, dependentes, ...leadUpdates } = req.body;
 
     const lead = await Lead.findByPk(id);
 
@@ -123,9 +162,32 @@ export const updateLead = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    await lead.update(updates);
+    await lead.update(leadUpdates);
 
-    return res.json(lead);
+    if (responsavel) {
+      await Responsavel.update(responsavel, {
+        where: { leadId: id },
+      });
+    }
+
+    if (dependentes) {
+      await Dependente.destroy({ where: { leadId: id } });
+      for (const dep of dependentes) {
+        await Dependente.create({
+          leadId: id,
+          ...dep,
+        });
+      }
+    }
+
+    const updatedLead = await Lead.findByPk(id, {
+      include: [
+        { model: Responsavel, as: 'responsavel' },
+        { model: Dependente, as: 'dependentes' },
+      ],
+    });
+
+    return res.json(updatedLead);
   } catch (error: any) {
     return res.status(400).json({
       error: error.message,
@@ -136,9 +198,11 @@ export const updateLead = async (req: AuthRequest, res: Response) => {
 export const convertLeadToClient = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { primaryLawyerId, ...clientData } = req.body;
+    const { primaryLawyerId } = req.body;
 
-    const lead = await Lead.findByPk(id);
+    const lead = await Lead.findByPk(id, {
+      include: [{ model: Responsavel, as: 'responsavel' }],
+    });
 
     if (!lead) {
       return res.status(404).json({
@@ -146,16 +210,24 @@ export const convertLeadToClient = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const { Client } = await import('../models');
+    const resp = (lead as any).responsavel;
 
     const client = await Client.create({
-      name: lead.name,
-      cpfCnpj: clientData.cpfCnpj,
-      email: lead.email,
-      phone: lead.phone,
-      whatsapp: lead.whatsapp,
+      name: resp.nomeCompleto,
+      cpfCnpj: resp.cpf || '',
+      email: resp.email,
+      phone: resp.telefone || '',
+      whatsapp: resp.telefone || '',
       primaryLawyerId: primaryLawyerId || req.userId,
-      ...clientData,
+      maritalStatus: resp.estadoCivil || '',
+      profession: resp.profissao || '',
+      address: resp.endereco || '',
+      city: resp.cidade || '',
+      state: resp.estado || '',
+      zipCode: resp.cep || '',
+      rg: resp.rg || '',
+      nationality: resp.nacionalidade || '',
+      needsFinancialAid: false,
     });
 
     await lead.update({ status: 'converted' });
@@ -166,6 +238,30 @@ export const convertLeadToClient = async (req: AuthRequest, res: Response) => {
     });
   } catch (error: any) {
     return res.status(400).json({
+      error: error.message,
+    });
+  }
+};
+
+export const deleteLead = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const lead = await Lead.findByPk(id);
+
+    if (!lead) {
+      return res.status(404).json({
+        error: 'Lead not found',
+      });
+    }
+
+    await lead.destroy();
+
+    return res.json({
+      message: 'Lead deleted successfully',
+    });
+  } catch (error: any) {
+    return res.status(500).json({
       error: error.message,
     });
   }

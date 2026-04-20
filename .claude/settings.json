@@ -39,7 +39,18 @@
       "Bash(cat)",
       "Bash(chmod +x /tmp/git_pull.sh)",
       "Bash(bash /tmp/git_pull.sh)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(curl -s https://sistema.advogadaleliciabarros.com.br/api/health)",
+      "Bash(curl -s http://sistema.advogadaleliciabarros.com.br/api/health)",
+      "Bash(curl -s http://147.93.38.211:3000/api/health)",
+      "Bash(curl -s http://localhost:3001)",
+      "Read(//c/Users/prosy/AppData/Local/npm-cache/_logs/**)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@example.com\",\"password\":\"123456\"}')",
+      "Bash(pkill -f \"node dist/index.js\")",
+      "Bash(curl -s http://localhost:3000/api/analytics/dashboard)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

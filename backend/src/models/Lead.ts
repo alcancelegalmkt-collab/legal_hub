@@ -4,19 +4,26 @@ import User from './User';
 
 interface LeadAttributes {
   id: number;
-  name: string;
-  email: string;
-  phone: string;
-  whatsapp: string;
   legalArea: string;
-  description: string;
+  tipoDemanda: string;
+  resumoCaso: string;
+  objetivoCliente: string;
   urgency: 'low' | 'medium' | 'high';
-  estimatedBudget: number | null;
-  source: 'whatsapp' | 'phone' | 'email' | 'website' | 'referral';
-  status: 'new' | 'contacted' | 'qualified' | 'lost' | 'converted';
-  aiQualificationScore: number;
+  observacoesEstrategicas: string | null;
+  possuiDependente: boolean;
+  status: 'new' | 'contacted' | 'qualified' | 'proposal_generated' | 'proposal_sent' | 'closed' | 'lost' | 'converted';
+  propostaStatus: string | null;
+  propostaPdfUrl: string | null;
+  propostaPdfNome: string | null;
+  propostaEnviadaEm: Date | null;
+  propostaEnviadaPor: string | null;
+  valorProposto: number | null;
+  formaPagamento: string | null;
+  vencimentoProposta: Date | null;
+  entrada: number | null;
+  parcelamento: number | null;
+  honorariosExito: number | null;
   assignedToId: number | null;
-  notes: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,19 +32,26 @@ interface LeadCreationAttributes extends Optional<LeadAttributes, 'id' | 'create
 
 class Lead extends Model<LeadAttributes, LeadCreationAttributes> implements LeadAttributes {
   public id!: number;
-  public name!: string;
-  public email!: string;
-  public phone!: string;
-  public whatsapp!: string;
   public legalArea!: string;
-  public description!: string;
+  public tipoDemanda!: string;
+  public resumoCaso!: string;
+  public objetivoCliente!: string;
   public urgency!: 'low' | 'medium' | 'high';
-  public estimatedBudget!: number | null;
-  public source!: 'whatsapp' | 'phone' | 'email' | 'website' | 'referral';
-  public status!: 'new' | 'contacted' | 'qualified' | 'lost' | 'converted';
-  public aiQualificationScore!: number;
+  public observacoesEstrategicas!: string | null;
+  public possuiDependente!: boolean;
+  public status!: 'new' | 'contacted' | 'qualified' | 'proposal_generated' | 'proposal_sent' | 'closed' | 'lost' | 'converted';
+  public propostaStatus!: string | null;
+  public propostaPdfUrl!: string | null;
+  public propostaPdfNome!: string | null;
+  public propostaEnviadaEm!: Date | null;
+  public propostaEnviadaPor!: string | null;
+  public valorProposto!: number | null;
+  public formaPagamento!: string | null;
+  public vencimentoProposta!: Date | null;
+  public entrada!: number | null;
+  public parcelamento!: number | null;
+  public honorariosExito!: number | null;
   public assignedToId!: number | null;
-  public notes!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -49,51 +63,90 @@ Lead.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    whatsapp: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
     legalArea: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      comment: 'trabalhista, família, civil, penal, administrativo, etc',
+      comment: 'família, trabalhista, civil, penal, administrativo, previdenciário, etc',
     },
-    description: {
+    tipoDemanda: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      comment: 'ação de alimentos, guarda, divórcio, BPC/LOAS, etc',
+    },
+    resumoCaso: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      comment: 'Resumo detalhado da reunião/caso - alimenta contratos personalizados',
+    },
+    objetivoCliente: {
       type: DataTypes.TEXT,
       allowNull: true,
+      comment: 'O que o cliente quer alcançar com a ação',
     },
     urgency: {
       type: DataTypes.ENUM('low', 'medium', 'high'),
       defaultValue: 'medium',
     },
-    estimatedBudget: {
+    observacoesEstrategicas: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: 'Observações internas sobre estratégia',
+    },
+    possuiDependente: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    status: {
+      type: DataTypes.ENUM('new', 'contacted', 'qualified', 'proposal_generated', 'proposal_sent', 'closed', 'lost', 'converted'),
+      defaultValue: 'new',
+    },
+    propostaStatus: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: 'pendente, aceita, rejeitada, vencida',
+    },
+    propostaPdfUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    propostaPdfNome: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    propostaEnviadaEm: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    propostaEnviadaPor: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: 'whatsapp, email, manual, etc',
+    },
+    valorProposto: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: true,
     },
-    source: {
-      type: DataTypes.ENUM('whatsapp', 'phone', 'email', 'website', 'referral'),
-      defaultValue: 'whatsapp',
+    formaPagamento: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: 'à vista, parcelado, entrada + parcelado, etc',
     },
-    status: {
-      type: DataTypes.ENUM('new', 'contacted', 'qualified', 'lost', 'converted'),
-      defaultValue: 'new',
+    vencimentoProposta: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
-    aiQualificationScore: {
+    entrada: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+    },
+    parcelamento: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
-      comment: 'Score from 0-100 given by AI qualification',
+      allowNull: true,
+      comment: 'número de parcelas',
+    },
+    honorariosExito: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
     },
     assignedToId: {
       type: DataTypes.INTEGER,
@@ -101,10 +154,6 @@ Lead.init(
         model: User,
         key: 'id',
       },
-      allowNull: true,
-    },
-    notes: {
-      type: DataTypes.TEXT,
       allowNull: true,
     },
     createdAt: {

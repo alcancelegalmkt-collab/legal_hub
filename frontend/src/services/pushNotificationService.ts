@@ -76,11 +76,11 @@ class PushNotificationService {
     try {
       const subscription = await this.serviceWorkerRegistration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey),
+        applicationServerKey: this.urlBase64ToUint8Array(this.vapidPublicKey) as any,
       });
 
       // Send subscription to backend
-      await this.sendSubscriptionToBackend(subscription);
+      await this.sendSubscriptionToBackend(subscription as any);
       console.log('Subscribed to push notifications');
     } catch (error) {
       console.error('Failed to subscribe to push notifications:', error);

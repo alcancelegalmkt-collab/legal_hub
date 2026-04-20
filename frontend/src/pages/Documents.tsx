@@ -84,7 +84,7 @@ const Documents: React.FC = () => {
       title: doc.title,
       fileName: doc.fileName,
       filePath: doc.filePath,
-      fileUrl: doc.fileUrl,
+      fileUrl: doc.fileUrl || '',
     });
     setShowModal(true);
   };
@@ -307,7 +307,7 @@ const Documents: React.FC = () => {
                         <td className="py-3 px-4 text-sm text-gray-600">
                           {doc.fileName ? (
                             <a
-                              href={doc.fileUrl}
+                              href={doc.fileUrl || ''}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-legal-600 hover:text-legal-700 underline"

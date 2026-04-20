@@ -64,8 +64,8 @@ export default function Monitoring() {
     try {
       const [metricsRes, healthRes, hourlyRes] = await Promise.all([
         api.getDashboardMetrics(),
-        api.client.get('/monitoring/health'),
-        api.client.get('/monitoring/hourly'),
+        api.get('/monitoring/health'),
+        api.get('/monitoring/hourly'),
       ]);
 
       setMetrics(metricsRes.data.metrics);
@@ -254,7 +254,7 @@ export default function Monitoring() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
+                    label={({ name, value }: any) => `${name}: ${value}`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"

@@ -261,6 +261,23 @@ class ApiService {
     });
     return data;
   }
+
+  // Generic HTTP methods
+  get(url: string, config?: any) {
+    return this.api.get(url, config);
+  }
+
+  post(url: string, data?: any, config?: any) {
+    return this.api.post(url, data, config);
+  }
+
+  put(url: string, data?: any, config?: any) {
+    return this.api.put(url, data, config);
+  }
+
+  delete(url: string, config?: any) {
+    return this.api.delete(url, config);
+  }
 }
 
 export default new ApiService();

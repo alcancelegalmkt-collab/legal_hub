@@ -66,6 +66,33 @@ app.use('/api/webhooks', webhookRoutes);
 // app.use('/api/deadlines', deadlineRoutes); // TODO: Fix deadline service
 // app.use('/api/escavador', escavadorRoutes); // TODO: Fix escavador service
 
+// Stub endpoints for disabled services
+app.get('/api/analytics/dashboard', (_req, res) => {
+  res.json({
+    metrics: {
+      totalLeads: 0,
+      totalClients: 0,
+      totalCases: 0,
+      totalDocuments: 0
+    }
+  });
+});
+app.get('/api/analytics/trends/documents', (_req, res) => {
+  res.json({ data: [] });
+});
+app.get('/api/monitoring/health', (_req, res) => {
+  res.json({ health: { status: 'ok' } });
+});
+app.get('/api/monitoring/hourly', (_req, res) => {
+  res.json({ data: [] });
+});
+app.get('/api/leads', (_req, res) => {
+  res.json({ leads: [], total: 0 });
+});
+app.get('/api/cases', (_req, res) => {
+  res.json({ cases: [], total: 0 });
+});
+
 // Database sync and start server
 (async () => {
   try {
