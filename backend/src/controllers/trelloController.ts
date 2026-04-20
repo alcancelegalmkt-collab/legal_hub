@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import trelloService from '../services/trelloService';
 import Document from '../models/Document';
 
-export const createDocumentCard = async (_req: AuthRequest, res: Response) => {
+export const createDocumentCard = async (req: AuthRequest, res: Response) => {
   try {
     const { documentId, boardName, listName } = req.body;
 
@@ -57,7 +57,7 @@ export const getBoards = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const getListsInBoard = async (_req: AuthRequest, res: Response) => {
+export const getListsInBoard = async (req: AuthRequest, res: Response) => {
   try {
     const { boardId } = req.params;
 
@@ -82,7 +82,7 @@ export const getListsInBoard = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateCard = async (_req: AuthRequest, res: Response) => {
+export const updateCard = async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.params;
     const updates = req.body;
@@ -107,7 +107,7 @@ export const updateCard = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const addCommentToCard = async (_req: AuthRequest, res: Response) => {
+export const addCommentToCard = async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.params;
     const { comment } = req.body;
@@ -131,7 +131,7 @@ export const addCommentToCard = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const addMemberToCard = async (_req: AuthRequest, res: Response) => {
+export const addMemberToCard = async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.params;
     const { memberId } = req.body;
@@ -155,7 +155,7 @@ export const addMemberToCard = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const createCaseCard = async (_req: AuthRequest, res: Response) => {
+export const createCaseCard = async (req: AuthRequest, res: Response) => {
   try {
     const { caseId, listId } = req.body;
 
@@ -180,7 +180,7 @@ export const createCaseCard = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const addChecklistToCard = async (_req: AuthRequest, res: Response) => {
+export const addChecklistToCard = async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.params;
     const { checklistName, items } = req.body;

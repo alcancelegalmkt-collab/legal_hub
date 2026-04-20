@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Movimentacao, Case } from '../models';
 import { Op } from 'sequelize';
 
-export const listarMovimentacoes = async (_req: Request, res: Response) => {
+export const listarMovimentacoes = async (req: Request, res: Response) => {
   try {
     const {
       caseId,
@@ -58,7 +58,7 @@ export const listarMovimentacoes = async (_req: Request, res: Response) => {
   }
 };
 
-export const obterMovimentacoesPorCaso = async (_req: Request, res: Response) => {
+export const obterMovimentacoesPorCaso = async (req: Request, res: Response) => {
   try {
     const { caseId } = req.params;
 

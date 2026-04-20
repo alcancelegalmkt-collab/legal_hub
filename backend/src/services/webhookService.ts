@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { Case } from '../models';
-import { Client } from '../models';
 import emailService from './emailService';
-import { differenceInDays } from 'date-fns';
+// import { differenceInDays } from 'date-fns'; // TODO: Use if needed
 
 interface WebhookPayload {
   event: string;
@@ -232,7 +231,7 @@ class WebhookService {
    */
   private async handleCreateDocument(payload: any) {
     try {
-      const { caseId, title, type, content } = payload;
+      const { caseId, title, type } = payload;
 
       if (!caseId || !title || !type) {
         return { success: false, message: 'Missing required fields' };

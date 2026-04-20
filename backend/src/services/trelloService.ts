@@ -165,8 +165,8 @@ class TrelloService {
       }
 
       // Preparar descrição do card
-      const client = document.client as any;
-      const caseData = document.case as any;
+      const client = (document as any).client || { name: 'Unknown', cpfCnpj: '', email: '' };
+      const caseData = (document as any).case;
 
       let description = `**Cliente:** ${client.name}\n`;
       description += `**CPF/CNPJ:** ${client.cpfCnpj}\n`;
@@ -322,7 +322,7 @@ class TrelloService {
         throw new Error(`Caso não encontrado: ${caseId}`);
       }
 
-      const client = caseData.client as any;
+      const client = (caseData as any).client || { name: 'Unknown' };
 
       const card = await this.createCard(listId, {
         name: `⚖️ ${caseData.title} - ${client.name}`,

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import emailService from '../services/emailService';
 
-export const sendCaseUpdate = async (_req: Request, res: Response) => {
+export const sendCaseUpdate = async (req: Request, res: Response) => {
   try {
     const {
       clientName,
@@ -52,7 +52,7 @@ export const sendCaseUpdate = async (_req: Request, res: Response) => {
   }
 };
 
-export const sendTestEmail = async (_req: Request, res: Response) => {
+export const sendTestEmail = async (req: Request, res: Response) => {
   try {
     const { to, subject, message } = req.body;
 

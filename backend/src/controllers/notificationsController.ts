@@ -60,7 +60,7 @@ export const unsubscribeFromPushNotifications = async (
   }
 };
 
-export const sendNotification = async (_req: AuthRequest, res: Response) => {
+export const sendNotification = async (req: AuthRequest, res: Response) => {
   try {
     const { userId, title, body, icon, tag, url } = req.body;
 
@@ -90,7 +90,7 @@ export const sendNotification = async (_req: AuthRequest, res: Response) => {
   }
 };
 
-export const notifyDocumentSigned = async (_req: AuthRequest, res: Response) => {
+export const notifyDocumentSigned = async (req: AuthRequest, res: Response) => {
   try {
     const { documentId, clientName, documentType } = req.body;
 
@@ -132,7 +132,7 @@ export const notifyDocumentSigned = async (_req: AuthRequest, res: Response) => 
   }
 };
 
-export const notifyDocumentGenerated = async (_req: AuthRequest, res: Response) => {
+export const notifyDocumentGenerated = async (req: AuthRequest, res: Response) => {
   try {
     const { documentId, clientName, documentType } = req.body;
 
@@ -163,7 +163,7 @@ export const notifyDocumentGenerated = async (_req: AuthRequest, res: Response) 
   }
 };
 
-export const notifyCaseStatusChanged = async (_req: AuthRequest, res: Response) => {
+export const notifyCaseStatusChanged = async (req: AuthRequest, res: Response) => {
   try {
     const { caseId, caseName, newStatus } = req.body;
 
@@ -194,7 +194,7 @@ export const notifyCaseStatusChanged = async (_req: AuthRequest, res: Response) 
   }
 };
 
-export const getNotificationSettings = async (_req: AuthRequest, res: Response) => {
+export const getNotificationSettings = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
 

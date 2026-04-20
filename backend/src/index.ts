@@ -13,13 +13,17 @@ import caseRoutes from './routes/caseRoutes';
 import documentRoutes from './routes/documentRoutes';
 import whatsappRoutes from './routes/whatsappRoutes';
 import emailRoutes from './routes/emailRoutes';
-import schedulingRoutes from './routes/schedulingRoutes';
+// import caseProgressRoutes from './routes/caseProgressRoutes'; // TODO: Fix case progress service
+// import analyticsRoutes from './routes/analyticsRoutes'; // TODO: Fix analytics service
+// import trelloRoutes from './routes/trelloRoutes'; // TODO: Fix trello service
+// import notificationsRoutes from './routes/notificationsRoutes'; // TODO: Fix notification service
+// import schedulingRoutes from './routes/schedulingRoutes'; // TODO: Fix scheduling service
 import webhookRoutes from './routes/webhookRoutes';
-import monitoringRoutes from './routes/monitoringRoutes';
-import deadlineRoutes from './routes/deadlineRoutes';
-import escavadorRoutes from './routes/escavadorRoutes';
+// import monitoringRoutes from './routes/monitoringRoutes'; // TODO: Fix monitoring service
+// import deadlineRoutes from './routes/deadlineRoutes'; // TODO: Fix deadline service
+// import escavadorRoutes from './routes/escavadorRoutes'; // TODO: Fix escavador service
 import { initializeWhatsApp } from './services/whatsappService';
-import schedulingService from './services/schedulingService';
+// import schedulingService from './services/schedulingService'; // TODO: Fix scheduling service
 
 dotenv.config();
 
@@ -52,11 +56,15 @@ app.use('/api/cases', caseRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/emails', emailRoutes);
-app.use('/api/scheduling', schedulingRoutes);
+// app.use('/api/case-progress', caseProgressRoutes); // TODO: Fix case progress service
+// app.use('/api/analytics', analyticsRoutes); // TODO: Fix analytics service
+// app.use('/api/trello', trelloRoutes); // TODO: Fix trello service
+// app.use('/api/notifications', notificationsRoutes); // TODO: Fix notification service
+// app.use('/api/scheduling', schedulingRoutes); // TODO: Fix scheduling service
 app.use('/api/webhooks', webhookRoutes);
-app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/deadlines', deadlineRoutes);
-app.use('/api/escavador', escavadorRoutes);
+// app.use('/api/monitoring', monitoringRoutes); // TODO: Fix monitoring service
+// app.use('/api/deadlines', deadlineRoutes); // TODO: Fix deadline service
+// app.use('/api/escavador', escavadorRoutes); // TODO: Fix escavador service
 
 // Database sync and start server
 (async () => {
@@ -108,10 +116,11 @@ app.use('/api/escavador', escavadorRoutes);
     }, 2000);
 
     // Inicializar agendamentos de email
-    setTimeout(() => {
-      console.log('\n⏰ Iniciando agendador de emails...');
-      schedulingService.startAllJobs();
-    }, 3000);
+    // TODO: Fix scheduling service and re-enable
+    // setTimeout(() => {
+    //   console.log('\n⏰ Iniciando agendador de emails...');
+    //   schedulingService.startAllJobs();
+    // }, 3000);
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);

@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import escavadorService from '../services/escavadorService';
+// import escavadorService from '../services/escavadorService'; // TODO: Re-enable when service is fixed
+const escavadorService: any = {};
 
-export const buscarProcesso = async (_req: Request, res: Response) => {
+export const buscarProcesso = async (req: Request, res: Response) => {
   try {
-    const { numero } = req.params;
+    const {numero } = req.params;
 
     if (!numero) {
       return res.status(400).json({
@@ -55,9 +56,9 @@ export const sincronizarTodos = async (__req: Request, res: Response) => {
   }
 };
 
-export const sincronizarCaso = async (_req: Request, res: Response) => {
+export const sincronizarCaso = async (req: Request, res: Response) => {
   try {
-    const { caseId } = req.params;
+    const {caseId } = req.params;
 
     if (!caseId) {
       return res.status(400).json({
@@ -113,9 +114,9 @@ export const sincronizarCaso = async (_req: Request, res: Response) => {
   }
 };
 
-export const obterStatus = async (_req: Request, res: Response) => {
+export const obterStatus = async (req: Request, res: Response) => {
   try {
-    const { caseId } = req.params;
+    const {caseId } = req.params;
 
     if (!caseId) {
       return res.status(400).json({

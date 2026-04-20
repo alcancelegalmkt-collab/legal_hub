@@ -26,7 +26,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getStatus = async (req: AuthRequest, res: Response) => {
+export const getStatus = async (_req: AuthRequest, res: Response) => {
   try {
     const status = getWhatsAppStatus();
 
@@ -67,7 +67,7 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const qrCodeStatus = async (req: AuthRequest, res: Response) => {
+export const qrCodeStatus = async (_req: AuthRequest, res: Response) => {
   try {
     const status = getWhatsAppStatus();
 

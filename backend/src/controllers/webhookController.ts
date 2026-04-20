@@ -4,7 +4,7 @@ import webhookService from '../services/webhookService';
 /**
  * Receber webhook do n8n com ações para executar
  */
-export const handleN8nWebhook = async (_req: Request, res: Response) => {
+export const handleN8nWebhook = async (req: Request, res: Response) => {
   try {
     const { action, payload } = req.body;
 
@@ -37,7 +37,7 @@ export const handleN8nWebhook = async (_req: Request, res: Response) => {
  * Trigger: Caso foi atualizado
  * Dispara quando um caso é atualizado (para enviar para n8n)
  */
-export const triggerCaseUpdate = async (_req: Request, res: Response) => {
+export const triggerCaseUpdate = async (req: Request, res: Response) => {
   try {
     const { caseId, title, description, status, completionPercentage, deadline, action } =
       req.body;
@@ -75,7 +75,7 @@ export const triggerCaseUpdate = async (_req: Request, res: Response) => {
 /**
  * Trigger: Documento foi assinado
  */
-export const triggerDocumentSigned = async (_req: Request, res: Response) => {
+export const triggerDocumentSigned = async (req: Request, res: Response) => {
   try {
     const { documentId, caseId } = req.body;
 
@@ -105,7 +105,7 @@ export const triggerDocumentSigned = async (_req: Request, res: Response) => {
 /**
  * Trigger: Novo cliente foi criado
  */
-export const triggerNewClient = async (_req: Request, res: Response) => {
+export const triggerNewClient = async (req: Request, res: Response) => {
   try {
     const { clientId } = req.body;
 
@@ -134,7 +134,7 @@ export const triggerNewClient = async (_req: Request, res: Response) => {
 /**
  * Obter exemplos de workflows do n8n
  */
-export const getN8nWorkflowExamples = (_req: Request, res: Response) => {
+export const getN8nWorkflowExamples = (req: Request, res: Response) => {
   try {
     const { type } = req.query;
 
