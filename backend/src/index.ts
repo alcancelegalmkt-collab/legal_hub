@@ -11,6 +11,7 @@ import leadRoutes from './routes/leadRoutes';
 import clientRoutes from './routes/clientRoutes';
 import caseRoutes from './routes/caseRoutes';
 import documentRoutes from './routes/documentRoutes';
+import proposalRoutes from './routes/proposalRoutes';
 import whatsappRoutes from './routes/whatsappRoutes';
 import emailRoutes from './routes/emailRoutes';
 // import caseProgressRoutes from './routes/caseProgressRoutes'; // TODO: Fix case progress service
@@ -54,6 +55,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/cases', caseRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/proposals', proposalRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/emails', emailRoutes);
 // app.use('/api/case-progress', caseProgressRoutes); // TODO: Fix case progress service

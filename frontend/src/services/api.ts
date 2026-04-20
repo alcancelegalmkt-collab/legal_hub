@@ -91,6 +91,35 @@ class ApiService {
     return data;
   }
 
+  // ===== Proposals =====
+  async generateProposalPreview(leadId: number, customTerms?: string): Promise<any> {
+    const { data } = await this.api.post(`/proposals/${leadId}/preview`, { customTerms });
+    return data;
+  }
+
+  async generateProposalPDF(leadId: number, customTerms?: string): Promise<any> {
+    const { data } = await this.api.post(`/proposals/${leadId}/pdf`, { customTerms }, {
+      responseType: 'text',
+    });
+    return data;
+  }
+
+  async sendProposalByEmail(leadId: number, recipientEmail: string, customTerms?: string): Promise<any> {
+    const { data } = await this.api.post(`/proposals/${leadId}/send-email`, {
+      recipientEmail,
+      customTerms,
+    });
+    return data;
+  }
+
+  async sendProposalByWhatsApp(leadId: number, recipientPhone: string, customTerms?: string): Promise<any> {
+    const { data } = await this.api.post(`/proposals/${leadId}/send-whatsapp`, {
+      recipientPhone,
+      customTerms,
+    });
+    return data;
+  }
+
   // ===== Clients =====
   async createClient(client: Partial<Client>): Promise<Client> {
     const { data } = await this.api.post('/clients', client);

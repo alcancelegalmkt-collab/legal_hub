@@ -19,6 +19,8 @@ interface ClientAttributes {
   nationality: string;
   needsFinancialAid: boolean;
   primaryLawyerId: number;
+  leadId?: number | null;
+  financialResponsibleId?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +44,8 @@ class Client extends Model<ClientAttributes, ClientCreationAttributes> implement
   public nationality!: string;
   public needsFinancialAid!: boolean;
   public primaryLawyerId!: number;
+  public leadId?: number | null;
+  public financialResponsibleId?: number | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -117,6 +121,26 @@ Client.init(
         key: 'id',
       },
       allowNull: false,
+    },
+    leadId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'leads',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      comment: 'Lead que foi convertido em cliente',
+    },
+    financialResponsibleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'financial_responsibles',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+      comment: 'Responsável financeiro (pode ser terceiro)',
     },
     createdAt: {
       type: DataTypes.DATE,

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { Lead, User, Responsavel, Dependente, Client } from '../models';
 import { AuthRequest } from '../middleware/auth';
+import { LeadStatus } from '../types/enums';
 
 export const createLead = async (req: AuthRequest, res: Response) => {
   try {
@@ -34,8 +35,9 @@ export const createLead = async (req: AuthRequest, res: Response) => {
       objetivoCliente: objetivoCliente || '',
       urgency: urgency || 'medium',
       possuiDependente: possuiDependente || false,
-      status: 'new',
+      status: LeadStatus.NEW,
       assignedToId: req.userId,
+      userId: req.userId!,
     });
 
     await Responsavel.create({
@@ -230,7 +232,7 @@ export const convertLeadToClient = async (req: AuthRequest, res: Response) => {
       needsFinancialAid: false,
     });
 
-    await lead.update({ status: 'converted' });
+    await lead.update({ status: LeadStatus.CONVERTED });
 
     return res.status(201).json({
       message: 'Lead converted to client successfully',

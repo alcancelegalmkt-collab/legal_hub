@@ -6,24 +6,88 @@ export interface User {
   oabNumber: string;
 }
 
+export interface Responsavel {
+  id: number;
+  leadId: number;
+  nomeCompleto: string;
+  cpf: string | null;
+  rg: string | null;
+  dataNascimento: string | null;
+  estadoCivil: string | null;
+  profissao: string | null;
+  telefone: string | null;
+  email: string | null;
+  endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  relacaoComDependente: string | null;
+  nacionalidade: string | null;
+  nomeMae: string | null;
+  nomePai: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Dependente {
+  id: number;
+  leadId: number;
+  nomeCompleto: string;
+  cpf: string | null;
+  rgOuCertidao: string | null;
+  dataNascimento: string | null;
+  idade: number | null;
+  endereco: string | null;
+  cidade: string | null;
+  estado: string | null;
+  cep: string | null;
+  condicaoEspecifica: string | null;
+  parentesco: string | null;
+  nis: string | null;
+  numeroBeneficio: string | null;
+  deficienciaOuCondicaoSaude: string | null;
+  observacoesDocumentais: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Lead {
   id: number;
-  name: string;
-  email: string;
-  phone: string;
-  whatsapp: string;
   legalArea: string;
-  description: string;
+  tipoDemanda: string;
+  resumoCaso: string;
+  objetivoCliente: string;
   urgency: 'low' | 'medium' | 'high';
-  estimatedBudget: number | null;
-  source: 'whatsapp' | 'phone' | 'email' | 'website' | 'referral';
-  status: 'new' | 'contacted' | 'qualified' | 'lost' | 'converted';
-  aiQualificationScore: number;
+  observacoesEstrategicas: string | null;
+  possuiDependente: boolean;
+  status: 'new' | 'contacted' | 'qualified' | 'proposal_generated' | 'proposal_sent' | 'closed' | 'lost' | 'converted';
+  propostaStatus: string | null;
+  propostaPdfUrl: string | null;
+  propostaPdfNome: string | null;
+  propostaEnviadaEm: string | null;
+  propostaEnviadaPor: string | null;
+  valorProposto: number | null;
+  formaPagamento: string | null;
+  vencimentoProposta: string | null;
+  entrada: number | null;
+  parcelamento: number | null;
+  honorariosExito: number | null;
   assignedToId: number | null;
-  notes: string;
   createdAt: string;
   updatedAt: string;
   assignedTo?: User;
+  responsavel?: Responsavel;
+  dependentes?: Dependente[];
+  // Legacy fields for compatibility
+  name?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  description?: string;
+  estimatedBudget?: number | null;
+  source?: 'whatsapp' | 'phone' | 'email' | 'website' | 'referral';
+  aiQualificationScore?: number;
+  notes?: string;
 }
 
 export interface Client {

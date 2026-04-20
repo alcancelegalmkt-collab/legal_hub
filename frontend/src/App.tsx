@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './store/authStore';
 import Login from './pages/Login';
+import Leads from './pages/Leads';
+import Proposals from './pages/Proposals';
 import Clients from './pages/Clients';
 import Cases from './pages/Cases';
 import Documents from './pages/Documents';
@@ -34,7 +36,17 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        <Route path="/" element={<Navigate to="/clients" replace />} />
+        <Route path="/" element={<Navigate to="/leads" replace />} />
+
+        <Route
+          path="/leads"
+          element={<ProtectedRoute element={<Leads />} />}
+        />
+
+        <Route
+          path="/proposals"
+          element={<ProtectedRoute element={<Proposals />} />}
+        />
 
         <Route
           path="/clients"
@@ -51,7 +63,7 @@ const App: React.FC = () => {
           element={<ProtectedRoute element={<Documents />} />}
         />
 
-        <Route path="*" element={<Navigate to="/clients" replace />} />
+        <Route path="*" element={<Navigate to="/leads" replace />} />
       </Routes>
     </Router>
   );
