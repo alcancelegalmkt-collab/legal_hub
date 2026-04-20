@@ -28,7 +28,18 @@
       "Bash(curl -s http://localhost:3000/)",
       "Bash(curl -s http://localhost:3000/api/auth/register -X POST -H \"Content-Type: application/json\" -d '{\"name\":\"Test User\",\"email\":\"test@example.com\",\"password\":\"123456\"}')",
       "Bash(curl -s http://localhost:3001/)",
-      "Bash(netstat -tuln)"
+      "Bash(netstat -tuln)",
+      "Bash(git commit *)",
+      "Bash(ssh -p 65002 u528898188@147.93.38.211 \"cd /home/u528898188/domains/sistema.advogadaleliciabarros.com.br/public_html/.builds/source/legal_hub-master && git pull origin master 2>&1 | tail -10\")",
+      "Read(//c/Users/prosy/.ssh/**)",
+      "Bash(apt-get update *)",
+      "Bash(apt-get install *)",
+      "Bash(ssh -o StrictHostKeyChecking=accept-new -p 65002 u528898188@147.93.38.211)",
+      "Bash(npm list *)",
+      "Bash(cat)",
+      "Bash(chmod +x /tmp/git_pull.sh)",
+      "Bash(bash /tmp/git_pull.sh)",
+      "Read(//tmp/**)"
     ]
   }
 }
