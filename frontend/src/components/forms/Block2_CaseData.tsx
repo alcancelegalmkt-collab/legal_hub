@@ -31,7 +31,7 @@ export const Block2_CaseData: React.FC<Block2Props> = ({ data, onUpdate, onNext,
     const fetchLegalAreas = async () => {
       try {
         setLoadingAreas(true);
-        const response = await api.get('/legal-areas');
+        const response = await api.get('/leads/legal-areas');
         setLegalAreas(response.data);
       } catch (error) {
         console.error('Erro ao carregar áreas jurídicas:', error);
@@ -47,7 +47,7 @@ export const Block2_CaseData: React.FC<Block2Props> = ({ data, onUpdate, onNext,
       const fetchCaseTypes = async () => {
         try {
           setLoadingTypes(true);
-          const response = await api.get(`/case-types?legalAreaId=${data.legalAreaId}`);
+          const response = await api.get(`/leads/case-types?legalAreaId=${data.legalAreaId}`);
           setCaseTypes(response.data);
         } catch (error) {
           console.error('Erro ao carregar tipos de caso:', error);

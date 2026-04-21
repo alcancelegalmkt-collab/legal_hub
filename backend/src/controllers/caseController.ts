@@ -63,7 +63,7 @@ export const getCases = async (req: AuthRequest, res: Response) => {
 
     const where: any = {};
     if (status) where.status = status;
-    if (legalArea) where.legalArea = legalArea;
+    if (legalArea) where.legalAreaId = legalArea;
     if (clientId) where.clientId = clientId;
 
     const { count, rows } = await Case.findAndCountAll({

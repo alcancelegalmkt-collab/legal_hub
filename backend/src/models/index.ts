@@ -73,7 +73,7 @@ PaymentPlan.hasMany(PaymentInstallment, { as: 'installments', foreignKey: 'payme
 PaymentInstallment.belongsTo(PaymentPlan, { foreignKey: 'paymentPlanId' });
 
 // FinancialResponsible → Lead & Client
-FinancialResponsible.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
+FinancialResponsible.belongsTo(Lead, { as: 'associatedLead', foreignKey: 'leadId' });
 Lead.hasMany(FinancialResponsible, { as: 'financialResponsibles', foreignKey: 'leadId' });
 
 FinancialResponsible.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
@@ -84,7 +84,7 @@ Client.belongsTo(FinancialResponsible, { as: 'financialResponsible', foreignKey:
 
 // Proposal → ProposalAcceptance (one-to-one)
 Proposal.hasOne(ProposalAcceptance, { as: 'acceptance', foreignKey: 'proposalId' });
-ProposalAcceptance.belongsTo(Proposal, { as: 'proposal', foreignKey: 'proposalId' });
+ProposalAcceptance.belongsTo(Proposal, { as: 'sourceProposal', foreignKey: 'proposalId' });
 
 // Proposal → User (creator/responsible)
 Proposal.belongsTo(User, { as: 'responsibleUser', foreignKey: 'responsibleUserId' });
@@ -108,7 +108,7 @@ CaseType.hasMany(ContractTemplate, { as: 'contractTemplates', foreignKey: 'caseT
 GeneratedContract.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
 Client.hasMany(GeneratedContract, { as: 'contracts', foreignKey: 'clientId' });
 
-GeneratedContract.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
+GeneratedContract.belongsTo(Lead, { as: 'originatingLead', foreignKey: 'leadId' });
 Lead.hasMany(GeneratedContract, { as: 'generatedContracts', foreignKey: 'leadId' });
 
 GeneratedContract.belongsTo(ContractTemplate, { as: 'contractTemplate', foreignKey: 'contractTemplateId' });

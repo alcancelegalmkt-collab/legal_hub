@@ -11,8 +11,10 @@ import {
   FinancialRecord,
   Client,
 } from '../models';
-import { LeadStatus, HonoraryType, PaymentStatus, AcceptanceMethod, ProposalStatus, PaymentMethod, SuccessCalculationBase, SuccessPaymentMoment, ContractDuration } from '../types/enums';
+import { LeadStatus, HonoraryType, AcceptanceMethod, ProposalStatus, PaymentMethod, SuccessCalculationBase, SuccessPaymentMoment, ContractDuration } from '../types/enums';
 import { sequelize } from '../models';
+import { HonoraryCalculationService } from './honoraryCalculationService';
+import { PaymentPlanGenerationService } from './paymentPlanGenerationService';
 
 interface Block1Data {
   nomeCompleto: string;
@@ -99,7 +101,7 @@ interface LeadCreationResult {
   responsavel: Responsavel;
   dependentes: Dependente[];
   honoraryStructure: HonoraryStructure;
-  paymentPlan?: PaymentPlan;
+  paymentPlan: PaymentPlan | null;
   paymentInstallments: PaymentInstallment[];
   proposal: Proposal;
   proposalAcceptance: ProposalAcceptance;
@@ -126,8 +128,6 @@ export class LeadCompleteCreationService {
           legalAreaId: payload.leadDetails.legalAreaId,
           caseTypeId: payload.leadDetails.caseTypeId,
           status: LeadStatus.NEW,
-          // Legacy fields for backward compatibility
-          legalArea: '',
           tipoDemanda: payload.leadDetails.tipoDemanda,
           resumoCaso: payload.leadDetails.resumoCaso,
           objetivoCliente: payload.leadDetails.objetivoCliente,
@@ -178,7 +178,26 @@ export class LeadCompleteCreationService {
         )
       );
 
-      // Step 5: Create HonoraryStructure
+      // Step 5: Calculate honorary summary using HonoraryCalculationService
+      const honoraryCalculation = HonoraryCalculationService.calculateSummary({
+        honoraryType: payload.honoraryStructure.honoraryType,
+        initialValue: payload.honoraryStructure.initialValue,
+        initialInstallments: payload.honoraryStructure.initialInstallments,
+        initialFirstDueDate: payload.honoraryStructure.initialFirstDueDate ? new Date(payload.honoraryStructure.initialFirstDueDate) : undefined,
+        initialFixedDay: payload.honoraryStructure.initialFixedDay,
+        successPercentage: payload.honoraryStructure.successPercentage,
+        successCalculationBase: payload.honoraryStructure.successCalculationBase as SuccessCalculationBase | undefined,
+        successPaymentMoment: payload.honoraryStructure.successPaymentMoment as SuccessPaymentMoment | undefined,
+        estimatedCauseValue: payload.honoraryStructure.estimatedCauseValue,
+        monthlyValue: payload.honoraryStructure.monthlyValue,
+        contractDuration: payload.honoraryStructure.contractDuration as ContractDuration | undefined,
+        discountAmount: payload.honoraryStructure.discountAmount,
+        penaltyPercentage: payload.honoraryStructure.penaltyPercentage,
+        delayInterestPercentage: payload.honoraryStructure.delayInterestPercentage,
+        monetaryCorrection: payload.honoraryStructure.monetaryCorrection,
+      });
+
+      // Step 6: Create HonoraryStructure
       const honoraryStructure = await HonoraryStructure.create(
         {
           leadId: lead.id,
@@ -206,50 +225,25 @@ export class LeadCompleteCreationService {
         { transaction }
       );
 
-      // Step 6: Create PaymentPlan and PaymentInstallments if installments > 1
-      let paymentPlan: PaymentPlan | undefined;
-      let paymentInstallments: PaymentInstallment[] = [];
+      // Step 7: Generate PaymentPlan and PaymentInstallments
+      const paymentPlanResult = await PaymentPlanGenerationService.generatePaymentPlan(
+        honoraryStructure,
+        transaction
+      );
 
-      if (
-        payload.honoraryStructure.initialInstallments &&
-        payload.honoraryStructure.initialInstallments > 1 &&
-        payload.honoraryStructure.initialFirstDueDate
-      ) {
-        paymentPlan = await PaymentPlan.create(
-          {
-            honoraryStructureId: honoraryStructure.id,
-            paymentMethod: payload.honoraryStructure.initialPaymentMethod as PaymentMethod,
-            installments: payload.honoraryStructure.initialInstallments!,
-            firstDueDate: new Date(payload.honoraryStructure.initialFirstDueDate!),
-            fixedDay: payload.honoraryStructure.initialFixedDay,
-          },
-          { transaction }
-        );
-
-        // Generate PaymentInstallments
-        const installmentAmount =
-          (payload.honoraryStructure.initialValue || 0) / (payload.honoraryStructure.initialInstallments || 1);
-
-        paymentInstallments = await Promise.all(
-          Array.from({ length: payload.honoraryStructure.initialInstallments! }, (_, i) => {
-            const dueDate = new Date(payload.honoraryStructure.initialFirstDueDate!);
-            dueDate.setMonth(dueDate.getMonth() + i);
-
-            return PaymentInstallment.create(
-              {
-                paymentPlanId: paymentPlan!.id,
-                installmentNumber: i + 1,
-                dueDate,
-                amount: installmentAmount,
-                status: PaymentStatus.PENDING as PaymentStatus,
-              },
-              { transaction }
-            );
-          })
-        );
+      if (!paymentPlanResult.validation.isValid && paymentPlanResult.validation.errors.length > 0) {
+        throw new Error(`Payment plan validation failed: ${paymentPlanResult.validation.errors.join(', ')}`);
       }
 
-      // Step 7: Create Proposal
+      // Log any warnings
+      if (paymentPlanResult.validation.warnings.length > 0) {
+        console.warn('Payment plan warnings:', paymentPlanResult.validation.warnings);
+      }
+
+      const paymentPlan = paymentPlanResult.paymentPlan;
+      const paymentInstallments = paymentPlanResult.installments;
+
+      // Step 8: Create Proposal
       const proposalNumber = this.generateProposalNumber();
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + 30);
@@ -268,7 +262,7 @@ export class LeadCompleteCreationService {
         { transaction }
       );
 
-      // Step 8: Create ProposalAcceptance
+      // Step 9: Create ProposalAcceptance
       const proposalAcceptance = await ProposalAcceptance.create(
         {
           proposalId: proposal.id,
@@ -279,33 +273,27 @@ export class LeadCompleteCreationService {
         { transaction }
       );
 
-      // Step 9: Create FinancialRecord
+      // Step 10: Create FinancialRecord using calculated total value
+      const financialRecordTotal = payload.financialRecord.totalValue || honoraryCalculation.totalAmount;
+      const financialRecordPaid = payload.financialRecord.paidValue || 0;
+
       const financialRecord = await FinancialRecord.create(
         {
           clientId: lead.clientId || 0, // Will be updated when client is created
           leadId: lead.id,
           proposalAcceptanceId: proposalAcceptance.id,
-          totalValue: payload.financialRecord.totalValue,
-          paidValue: payload.financialRecord.paidValue,
-          pendingValue: payload.financialRecord.totalValue - payload.financialRecord.paidValue,
+          totalValue: financialRecordTotal,
+          paidValue: financialRecordPaid,
+          pendingValue: financialRecordTotal - financialRecordPaid,
           notes: payload.financialRecord.notes,
-        },
-        { transaction }
-      );
-
-      // Step 10: Update Lead with relationships
-      await lead.update(
-        {
-          proposalId: proposal.id,
-          proposalAcceptanceId: proposalAcceptance.id,
-          financialRecordId: financialRecord.id,
-          status: LeadStatus.PROPOSAL_SENT,
         },
         { transaction }
       );
 
       // Step 11: Convert Lead to Client (optional, if acceptance method is specified)
       let client: Client | undefined;
+      let finalLeadStatus = LeadStatus.PROPOSAL_SENT;
+
       if (payload.acceptance.acceptanceMethod) {
         client = await this.convertLeadToClient(
           lead.id,
@@ -316,7 +304,21 @@ export class LeadCompleteCreationService {
 
         // Update FinancialRecord with clientId
         await financialRecord.update({ clientId: client.id }, { transaction });
+
+        // Status changes to CONVERTED when lead becomes client
+        finalLeadStatus = LeadStatus.CONVERTED;
       }
+
+      // Step 12: Update Lead with final status and relationships
+      await lead.update(
+        {
+          proposalId: proposal.id,
+          proposalAcceptanceId: proposalAcceptance.id,
+          financialRecordId: financialRecord.id,
+          status: finalLeadStatus,
+        },
+        { transaction }
+      );
 
       await transaction.commit();
 
@@ -342,6 +344,7 @@ export class LeadCompleteCreationService {
   /**
    * Convert a Lead to a Client
    * Creates the Client record and links it to the Lead
+   * Note: Status update is handled by createCompleteLead
    */
   private static async convertLeadToClient(
     leadId: number,
@@ -371,9 +374,9 @@ export class LeadCompleteCreationService {
       { transaction }
     );
 
-    // Update Lead status to converted
+    // Link client to lead (status update happens in createCompleteLead)
     await Lead.update(
-      { clientId: client.id, status: LeadStatus.CONVERTED },
+      { clientId: client.id },
       { where: { id: leadId }, transaction }
     );
 
@@ -390,64 +393,29 @@ export class LeadCompleteCreationService {
   }
 
   /**
-   * Calculate total value including success fees
+   * Calculate total value using HonoraryCalculationService
    */
   static calculateTotalValue(
-    honoraryStructure: any,
-    estimatedCauseValue?: number
+    honoraryStructure: any
   ): number {
-    let total = 0;
-
-    switch (honoraryStructure.honoraryType) {
-      case HonoraryType.INITIAL_SUCCESS:
-        total = (honoraryStructure.initialValue || 0);
-        if (estimatedCauseValue && honoraryStructure.successPercentage) {
-          const successFee = (estimatedCauseValue * honoraryStructure.successPercentage) / 100;
-          total += successFee;
-        }
-        break;
-
-      case HonoraryType.UNIQUE:
-        total = honoraryStructure.initialValue || 0;
-        break;
-
-      case HonoraryType.SUCCESS_ONLY:
-        if (estimatedCauseValue && honoraryStructure.successPercentage) {
-          total = (estimatedCauseValue * honoraryStructure.successPercentage) / 100;
-        }
-        break;
-
-      case HonoraryType.MONTHLY:
-        if (honoraryStructure.monthlyValue && honoraryStructure.contractDuration) {
-          const months = this.getMonthsFromDuration(honoraryStructure.contractDuration);
-          total = (honoraryStructure.monthlyValue || 0) * months;
-        }
-        break;
-    }
-
-    // Apply discount if exists
-    if (honoraryStructure.discountAmount) {
-      total -= honoraryStructure.discountAmount;
-    }
-
-    return Math.max(0, total);
+    const summary = HonoraryCalculationService.calculateSummary({
+      honoraryType: honoraryStructure.honoraryType,
+      initialValue: honoraryStructure.initialValue,
+      initialInstallments: honoraryStructure.initialInstallments,
+      initialFirstDueDate: honoraryStructure.initialFirstDueDate,
+      initialFixedDay: honoraryStructure.initialFixedDay,
+      successPercentage: honoraryStructure.successPercentage,
+      successCalculationBase: honoraryStructure.successCalculationBase,
+      successPaymentMoment: honoraryStructure.successPaymentMoment,
+      estimatedCauseValue: honoraryStructure.estimatedCauseValue,
+      monthlyValue: honoraryStructure.monthlyValue,
+      contractDuration: honoraryStructure.contractDuration,
+      discountAmount: honoraryStructure.discountAmount,
+      penaltyPercentage: honoraryStructure.penaltyPercentage,
+      delayInterestPercentage: honoraryStructure.delayInterestPercentage,
+      monetaryCorrection: honoraryStructure.monetaryCorrection,
+    });
+    return summary.totalAmount;
   }
 
-  /**
-   * Get number of months from contract duration
-   */
-  private static getMonthsFromDuration(duration: string): number {
-    switch (duration) {
-      case 'indefinite':
-        return 12; // Default to 1 year for indefinite
-      case '3':
-        return 3;
-      case '6':
-        return 6;
-      case '12':
-        return 12;
-      default:
-        return 12;
-    }
-  }
 }

@@ -85,7 +85,5 @@ FinancialResponsible.init(
   }
 );
 
-FinancialResponsible.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
-FinancialResponsible.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
 
 export default FinancialResponsible;

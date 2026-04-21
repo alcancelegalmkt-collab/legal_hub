@@ -88,7 +88,5 @@ ContractTemplate.init(
   }
 );
 
-ContractTemplate.belongsTo(LegalArea, { as: 'legalArea', foreignKey: 'legalAreaId' });
-ContractTemplate.belongsTo(CaseType, { as: 'caseType', foreignKey: 'caseTypeId' });
 
 export default ContractTemplate;

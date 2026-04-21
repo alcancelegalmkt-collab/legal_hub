@@ -29,7 +29,7 @@ export const createLead = async (req: AuthRequest, res: Response) => {
     }
 
     const lead = await Lead.create({
-      legalArea,
+      legalAreaId: legalArea,
       tipoDemanda,
       resumoCaso,
       objetivoCliente: objetivoCliente || '',
@@ -77,7 +77,7 @@ export const getLeads = async (req: AuthRequest, res: Response) => {
 
     const where: any = {};
     if (status) where.status = status;
-    if (legalArea) where.legalArea = legalArea;
+    if (legalArea) where.legalAreaId = legalArea;
 
     const { count, rows } = await Lead.findAndCountAll({
       where,

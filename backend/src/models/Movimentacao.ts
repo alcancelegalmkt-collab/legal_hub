@@ -105,6 +105,5 @@ Movimentacao.init(
   }
 );
 
-Movimentacao.belongsTo(Case, { as: 'case', foreignKey: 'caseId' });
 
 export default Movimentacao;

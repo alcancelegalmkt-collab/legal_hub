@@ -80,6 +80,5 @@ LeadDetails.init(
   }
 );
 
-LeadDetails.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
 
 export default LeadDetails;

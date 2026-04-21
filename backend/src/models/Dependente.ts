@@ -147,6 +147,5 @@ Dependente.init(
   }
 );
 
-Dependente.belongsTo(Lead, { foreignKey: 'leadId', onDelete: 'CASCADE' });
 
 export default Dependente;

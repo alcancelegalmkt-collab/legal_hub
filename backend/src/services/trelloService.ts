@@ -137,7 +137,7 @@ class TrelloService {
           {
             model: Case,
             as: 'case',
-            attributes: ['id', 'title', 'legalArea', 'caseNumber'],
+            attributes: ['id', 'title', 'legalAreaId', 'caseNumber'],
           },
         ],
       });
@@ -177,7 +177,7 @@ class TrelloService {
       if (caseData) {
         description += `\n**Caso:**\n`;
         description += `- Título: ${caseData.title}\n`;
-        description += `- Área: ${caseData.legalArea}\n`;
+        description += `- Área: ${caseData.legalAreaId}\n`;
         if (caseData.caseNumber) {
           description += `- Número: ${caseData.caseNumber}\n`;
         }

@@ -120,7 +120,5 @@ Document.init(
   }
 );
 
-Document.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
-Document.belongsTo(Case, { as: 'case', foreignKey: 'caseId' });
 
 export default Document;

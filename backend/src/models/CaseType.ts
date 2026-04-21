@@ -59,6 +59,4 @@ CaseType.init(
   }
 );
 
-CaseType.belongsTo(LegalArea, { as: 'legalArea', foreignKey: 'legalAreaId' });
-
 export default CaseType;

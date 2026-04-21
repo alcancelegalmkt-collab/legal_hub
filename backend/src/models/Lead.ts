@@ -14,7 +14,6 @@ interface LeadAttributes {
   proposalId?: number | null;
   proposalAcceptanceId?: number | null;
   financialRecordId?: number | null;
-  legalArea?: string | null;
   tipoDemanda?: string | null;
   resumoCaso?: string | null;
   objetivoCliente?: string | null;
@@ -49,7 +48,6 @@ class Lead extends Model<LeadAttributes, LeadCreationAttributes> implements Lead
   public proposalId?: number | null;
   public proposalAcceptanceId?: number | null;
   public financialRecordId?: number | null;
-  public legalArea?: string | null;
   public tipoDemanda?: string | null;
   public resumoCaso?: string | null;
   public objetivoCliente?: string | null;
@@ -155,11 +153,6 @@ Lead.init(
       },
       onDelete: 'SET NULL',
       comment: 'Registro financeiro associado',
-    },
-    legalArea: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-      comment: '[LEGACY] família, trabalhista, civil, penal, administrativo, previdenciário, etc',
     },
     tipoDemanda: {
       type: DataTypes.STRING(255),

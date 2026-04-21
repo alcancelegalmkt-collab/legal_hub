@@ -49,11 +49,16 @@ export const createCompleteLead = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Validate Block 7 (Financial)
-    const { totalValue } = payload.financialRecord || {};
-    if (!totalValue || totalValue <= 0) {
+    // Validate Block 7 (Financial) - totalValue is optional, will be calculated if not provided
+    const { totalValue, paidValue } = payload.financialRecord || {};
+    if (totalValue && totalValue <= 0) {
       return res.status(400).json({
-        error: 'Block 7 (Financial) invalid totalValue',
+        error: 'Block 7 (Financial) totalValue must be greater than 0',
+      });
+    }
+    if (paidValue && paidValue < 0) {
+      return res.status(400).json({
+        error: 'Block 7 (Financial) paidValue cannot be negative',
       });
     }
 
@@ -95,12 +100,14 @@ export const createCompleteLead = async (req: AuthRequest, res: Response) => {
  */
 export const getLegalAreas = async (_req: AuthRequest, res: Response) => {
   try {
+    console.log('[getLegalAreas] Called');
     const { LegalArea } = await import('../models');
 
     const areas = await LegalArea.findAll({
       order: [['name', 'ASC']],
     });
 
+    console.log('[getLegalAreas] Found', areas.length, 'areas');
     return res.json(areas);
   } catch (error: any) {
     console.error('Erro ao buscar áreas jurídicas:', error);

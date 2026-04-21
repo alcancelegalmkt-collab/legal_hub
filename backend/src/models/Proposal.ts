@@ -110,7 +110,4 @@ Proposal.init(
   }
 );
 
-Proposal.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
-Proposal.belongsTo(User, { as: 'responsibleUser', foreignKey: 'responsibleUserId' });
-
 export default Proposal;

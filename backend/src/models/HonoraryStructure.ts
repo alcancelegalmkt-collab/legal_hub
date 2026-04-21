@@ -214,6 +214,5 @@ HonoraryStructure.init(
   }
 );
 
-HonoraryStructure.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
 
 export default HonoraryStructure;

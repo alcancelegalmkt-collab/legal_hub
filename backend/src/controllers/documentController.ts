@@ -79,7 +79,7 @@ export const getDocuments = async (req: AuthRequest, res: Response) => {
         {
           model: Case,
           as: 'case',
-          attributes: ['id', 'title', 'legalArea'],
+          attributes: ['id', 'title', 'legalAreaId'],
         },
       ],
       offset,
@@ -115,7 +115,7 @@ export const getDocumentById = async (req: AuthRequest, res: Response) => {
         {
           model: Case,
           as: 'case',
-          attributes: ['id', 'title', 'legalArea', 'caseNumber'],
+          attributes: ['id', 'title', 'legalAreaId', 'caseNumber'],
         },
       ],
     });
@@ -251,7 +251,7 @@ export const getDocumentsByClient = async (req: AuthRequest, res: Response) => {
         {
           model: Case,
           as: 'case',
-          attributes: ['id', 'title', 'legalArea'],
+          attributes: ['id', 'title', 'legalAreaId'],
         },
       ],
       order: [['createdAt', 'DESC']],

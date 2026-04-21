@@ -90,6 +90,4 @@ ProposalAcceptance.init(
   }
 );
 
-ProposalAcceptance.belongsTo(Proposal, { as: 'proposal', foreignKey: 'proposalId' });
-
 export default ProposalAcceptance;

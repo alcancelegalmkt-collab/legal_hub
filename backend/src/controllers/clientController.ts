@@ -197,7 +197,7 @@ export const getClientWithCases = async (req: AuthRequest, res: Response) => {
           attributes: [
             'id',
             'title',
-            'legalArea',
+            'legalAreaId',
             'status',
             'caseValue',
             'startDate',

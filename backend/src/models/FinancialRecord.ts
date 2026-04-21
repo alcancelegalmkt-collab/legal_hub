@@ -96,11 +96,4 @@ FinancialRecord.init(
   }
 );
 
-FinancialRecord.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
-FinancialRecord.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
-FinancialRecord.belongsTo(ProposalAcceptance, {
-  as: 'proposalAcceptance',
-  foreignKey: 'proposalAcceptanceId',
-});
-
 export default FinancialRecord;

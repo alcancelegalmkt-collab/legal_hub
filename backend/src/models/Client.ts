@@ -157,18 +157,4 @@ Client.init(
   }
 );
 
-Client.belongsTo(User, { as: 'lawyer', foreignKey: 'primaryLawyerId' });
-
-// Relacionamento com Cases
-const setupClientAssociations = () => {
-  const Case = require('./Case').default;
-  const Document = require('./Document').default;
-
-  Client.hasMany(Case, { as: 'cases', foreignKey: 'clientId' });
-  Client.hasMany(Document, { as: 'documents', foreignKey: 'clientId' });
-};
-
-// Chamar setup de associações
-setTimeout(setupClientAssociations, 100);
-
 export default Client;

@@ -7,12 +7,14 @@ import fs from 'fs';
 import path from 'path';
 import { sequelize } from './models';
 import authRoutes from './routes/authRoutes';
-import leadRoutes from './routes/leadRoutes';
+// import leadRoutes from './routes/leadRoutes'; // TEMPORARILY DISABLED TO TEST
 import leadCompleteRoutes from './routes/leadCompleteRoutes';
-import clientRoutes from './routes/clientRoutes';
-import caseRoutes from './routes/caseRoutes';
-import documentRoutes from './routes/documentRoutes';
-import proposalRoutes from './routes/proposalRoutes';
+// import clientRoutes from './routes/clientRoutes';
+// import caseRoutes from './routes/caseRoutes';
+// import documentRoutes from './routes/documentRoutes';
+// import proposalRoutes from './routes/proposalRoutes';
+// import proposalGeneratorRoutes from './routes/proposalGeneratorRoutes';
+// import leadConversionRoutes from './routes/leadConversionRoutes';
 import whatsappRoutes from './routes/whatsappRoutes';
 import emailRoutes from './routes/emailRoutes';
 // import caseProgressRoutes from './routes/caseProgressRoutes'; // TODO: Fix case progress service
@@ -52,12 +54,16 @@ app.get('/api/health', (_req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/leads', leadRoutes);
+// Specific routes first (to avoid catch-all routes intercepting them)
 app.use('/api/leads', leadCompleteRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/cases', caseRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/proposals', proposalRoutes);
+// app.use('/api/leads', leadConversionRoutes); // TODO: Fix broken dependencies
+// General routes last
+// app.use('/api/leads', leadRoutes); // TEMPORARILY DISABLED TO TEST
+// app.use('/api/clients', clientRoutes); // TODO: Fix broken dependencies
+// app.use('/api/cases', caseRoutes); // TODO: Fix broken dependencies
+// app.use('/api/documents', documentRoutes); // TODO: Fix broken dependencies
+// app.use('/api/proposals', proposalRoutes); // TODO: Fix broken dependencies
+// app.use('/api/proposals', proposalGeneratorRoutes); // TODO: Fix broken dependencies
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/emails', emailRoutes);
 // app.use('/api/case-progress', caseProgressRoutes); // TODO: Fix case progress service

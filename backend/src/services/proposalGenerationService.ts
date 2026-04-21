@@ -331,7 +331,7 @@ const generateProposalHTML = (data: ProposalData): string => {
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Área Jurídica</div>
-                    <div class="info-value">${data.lead.legalArea}</div>
+                    <div class="info-value">${data.lead.legalAreaId}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Tipo de Demanda</div>

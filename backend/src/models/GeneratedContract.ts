@@ -110,11 +110,4 @@ GeneratedContract.init(
   }
 );
 
-GeneratedContract.belongsTo(Client, { as: 'client', foreignKey: 'clientId' });
-GeneratedContract.belongsTo(Lead, { as: 'lead', foreignKey: 'leadId' });
-GeneratedContract.belongsTo(ContractTemplate, {
-  as: 'contractTemplate',
-  foreignKey: 'contractTemplateId',
-});
-
 export default GeneratedContract;

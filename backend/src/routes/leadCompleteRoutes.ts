@@ -1,8 +1,14 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { createCompleteLead, getLegalAreas, getCaseTypesByArea } from '../controllers/leadCompleteController';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
+
+// Log all requests to this router
+router.use((req: Request, _res: Response, next: NextFunction) => {
+  console.log(`[leadCompleteRoutes] ${req.method} ${req.path}`);
+  next();
+});
 
 /**
  * POST /api/leads/complete
