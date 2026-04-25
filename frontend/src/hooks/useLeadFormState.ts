@@ -22,6 +22,17 @@ export interface LeadFormState {
     tipoDemanda: string;
     resumoCaso: string;
     objetivoCliente: string;
+    naturezaAtendimento: string;
+    areaDireito: string;
+    tipoAcaoServico: string;
+    resumoBreveAcao: string;
+    origemDescricao: string;
+    conteudoBruto: string;
+    descricaoGeradaIA: string;
+    descricaoFinalEditavel: string;
+    outraNaturezaDescricao: string;
+    outraAreaDescricao: string;
+    outraAcaoDescricao: string;
   };
 
   // Block 3: Dependents (conditional on caseType.requiresDependents)
@@ -110,6 +121,17 @@ const initialState: LeadFormState = {
     tipoDemanda: '',
     resumoCaso: '',
     objetivoCliente: '',
+    naturezaAtendimento: '',
+    areaDireito: '',
+    tipoAcaoServico: '',
+    resumoBreveAcao: '',
+    origemDescricao: '',
+    conteudoBruto: '',
+    descricaoGeradaIA: '',
+    descricaoFinalEditavel: '',
+    outraNaturezaDescricao: '',
+    outraAreaDescricao: '',
+    outraAcaoDescricao: '',
   },
   block3: {
     possuiDependente: false,
