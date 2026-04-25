@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { AuthResponse, Lead, LeadsResponse, Client, Case, Document } from '../types';
+import { AuthResponse, Lead, LeadsResponse, Client, Case, Document, WhatsAppConversation, WhatsAppInternalNote, WhatsAppMessage, WhatsAppTag } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -251,6 +251,45 @@ class ApiService {
 
   async checkAllPendingSignatures(): Promise<any> {
     const { data } = await this.api.post('/documents/check-signatures');
+    return data;
+  }
+
+
+  // ===== WhatsApp Inbox =====
+  async getWhatsAppConversations(filters?: {
+    status?: string;
+    assignedUserId?: number;
+    search?: string;
+  }): Promise<{ conversations: WhatsAppConversation[] }> {
+    const { data } = await this.api.get('/whatsapp-inbox/conversations', { params: filters });
+    return data;
+  }
+
+  async getWhatsAppConversationById(id: number): Promise<{
+    conversation: WhatsAppConversation & { messages: WhatsAppMessage[]; internalNotes: WhatsAppInternalNote[] };
+  }> {
+    const { data } = await this.api.get(`/whatsapp-inbox/conversations/${id}`);
+    return data;
+  }
+
+  async sendWhatsAppInboxMessage(
+    conversationId: number,
+    payload: { content: string; messageType?: WhatsAppMessage['messageType']; mediaUrl?: string }
+  ): Promise<{ message: WhatsAppMessage }> {
+    const { data } = await this.api.post(`/whatsapp-inbox/conversations/${conversationId}/messages`, payload);
+    return data;
+  }
+
+  async addWhatsAppInternalNote(
+    conversationId: number,
+    payload: { note: string }
+  ): Promise<{ internalNote: WhatsAppInternalNote }> {
+    const { data } = await this.api.post(`/whatsapp-inbox/conversations/${conversationId}/internal-notes`, payload);
+    return data;
+  }
+
+  async getWhatsAppTags(): Promise<{ tags: WhatsAppTag[] }> {
+    const { data } = await this.api.get('/whatsapp-inbox/tags');
     return data;
   }
 

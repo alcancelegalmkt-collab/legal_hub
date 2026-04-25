@@ -4,6 +4,7 @@ import {
   HomeIcon,
   UsersIcon,
   DocumentTextIcon,
+  ChatBubbleLeftRightIcon,
   CogIcon,
   ArrowLeftOnRectangleIcon,
 } from '@heroicons/react/24/outline';
@@ -23,11 +24,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const menuItems = [
-    { icon: UsersIcon, label: 'Leads', path: '/leads' },
+    { icon: HomeIcon, label: 'Leads', path: '/leads' },
     { icon: DocumentTextIcon, label: 'Propostas', path: '/proposals' },
     { icon: UsersIcon, label: 'Clientes', path: '/clients' },
     { icon: DocumentTextIcon, label: 'Casos', path: '/cases' },
     { icon: DocumentTextIcon, label: 'Documentos', path: '/documents' },
+    { icon: ChatBubbleLeftRightIcon, label: 'WhatsApp Inbox', path: '/whatsapp' },
   ];
 
   return (

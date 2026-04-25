@@ -187,3 +187,68 @@ export interface Movimentacao {
   updatedAt: string;
   case?: Case;
 }
+
+
+export interface WhatsAppTag {
+  id: number;
+  name: string;
+  color: string;
+  description?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WhatsAppMessage {
+  id: number;
+  conversationId: number;
+  direction: 'incoming' | 'outgoing';
+  messageType: 'text' | 'image' | 'document' | 'audio' | 'template' | 'interactive';
+  content: string;
+  mediaUrl?: string | null;
+  externalMessageId?: string | null;
+  sentAt: string;
+  readAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WhatsAppInternalNote {
+  id: number;
+  conversationId: number;
+  userId: number;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WhatsAppConversation {
+  id: number;
+  contactName: string;
+  phoneNumber: string;
+  clientId?: number | null;
+  leadId?: number | null;
+  assignedUserId?: number | null;
+  status: 'open' | 'waiting_client' | 'waiting_internal' | 'closed';
+  origin?: string | null;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null;
+  nextActionAt?: string | null;
+  pipelineStage:
+    | 'novo_lead'
+    | 'primeiro_atendimento'
+    | 'dados_coletados'
+    | 'analise_juridica'
+    | 'proposta_enviada'
+    | 'negociacao'
+    | 'contrato_enviado'
+    | 'contrato_assinado'
+    | 'cliente_ativo'
+    | 'encerrado';
+  internalSummary?: string | null;
+  assignedUser?: Pick<User, 'id' | 'name' | 'email'>;
+  tags?: WhatsAppTag[];
+  messages?: WhatsAppMessage[];
+  internalNotes?: WhatsAppInternalNote[];
+  createdAt: string;
+  updatedAt: string;
+}

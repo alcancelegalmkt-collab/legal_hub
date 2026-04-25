@@ -7,6 +7,7 @@ import Proposals from './pages/Proposals';
 import Clients from './pages/Clients';
 import Cases from './pages/Cases';
 import Documents from './pages/Documents';
+import WhatsAppInbox from './pages/WhatsAppInbox';
 
 interface ProtectedRouteProps {
   element: React.ReactNode;
@@ -61,6 +62,12 @@ const App: React.FC = () => {
         <Route
           path="/documents"
           element={<ProtectedRoute element={<Documents />} />}
+        />
+
+
+        <Route
+          path="/whatsapp"
+          element={<ProtectedRoute element={<WhatsAppInbox />} />}
         />
 
         <Route path="*" element={<Navigate to="/leads" replace />} />
