@@ -19,6 +19,11 @@ import ProposalAcceptance from './ProposalAcceptance';
 import FinancialRecord from './FinancialRecord';
 import ContractTemplate from './ContractTemplate';
 import GeneratedContract from './GeneratedContract';
+import WhatsAppConversation from './WhatsAppConversation';
+import WhatsAppMessage from './WhatsAppMessage';
+import WhatsAppTag from './WhatsAppTag';
+import WhatsAppInternalNote from './WhatsAppInternalNote';
+import WhatsAppConversationTag from './WhatsAppConversationTag';
 
 // ========== LEGACY RELATIONSHIPS ==========
 Lead.hasOne(Responsavel, { foreignKey: 'leadId', as: 'responsavel' });
@@ -114,6 +119,34 @@ Lead.hasMany(GeneratedContract, { as: 'generatedContracts', foreignKey: 'leadId'
 GeneratedContract.belongsTo(ContractTemplate, { as: 'contractTemplate', foreignKey: 'contractTemplateId' });
 ContractTemplate.hasMany(GeneratedContract, { as: 'generated', foreignKey: 'contractTemplateId' });
 
+
+// WhatsApp Inbox module
+WhatsAppConversation.belongsTo(User, { as: 'assignedUser', foreignKey: 'assignedUserId' });
+User.hasMany(WhatsAppConversation, { as: 'assignedConversations', foreignKey: 'assignedUserId' });
+
+WhatsAppConversation.hasMany(WhatsAppMessage, { as: 'messages', foreignKey: 'conversationId' });
+WhatsAppMessage.belongsTo(WhatsAppConversation, { as: 'conversation', foreignKey: 'conversationId' });
+
+WhatsAppConversation.hasMany(WhatsAppInternalNote, { as: 'internalNotes', foreignKey: 'conversationId' });
+WhatsAppInternalNote.belongsTo(WhatsAppConversation, { as: 'conversation', foreignKey: 'conversationId' });
+
+WhatsAppInternalNote.belongsTo(User, { as: 'author', foreignKey: 'userId' });
+User.hasMany(WhatsAppInternalNote, { as: 'whatsappNotes', foreignKey: 'userId' });
+
+WhatsAppConversation.belongsToMany(WhatsAppTag, {
+  as: 'tags',
+  through: WhatsAppConversationTag,
+  foreignKey: 'conversationId',
+  otherKey: 'tagId',
+});
+
+WhatsAppTag.belongsToMany(WhatsAppConversation, {
+  as: 'conversations',
+  through: WhatsAppConversationTag,
+  foreignKey: 'tagId',
+  otherKey: 'conversationId',
+});
+
 export {
   sequelize,
   User,
@@ -136,6 +169,11 @@ export {
   FinancialRecord,
   ContractTemplate,
   GeneratedContract,
+  WhatsAppConversation,
+  WhatsAppMessage,
+  WhatsAppTag,
+  WhatsAppInternalNote,
+  WhatsAppConversationTag,
 };
 
 export default {
@@ -160,4 +198,9 @@ export default {
   FinancialRecord,
   ContractTemplate,
   GeneratedContract,
+  WhatsAppConversation,
+  WhatsAppMessage,
+  WhatsAppTag,
+  WhatsAppInternalNote,
+  WhatsAppConversationTag,
 };

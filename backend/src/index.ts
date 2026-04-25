@@ -23,6 +23,7 @@ import emailRoutes from './routes/emailRoutes';
 // import notificationsRoutes from './routes/notificationsRoutes'; // TODO: Fix notification service
 // import schedulingRoutes from './routes/schedulingRoutes'; // TODO: Fix scheduling service
 import webhookRoutes from './routes/webhookRoutes';
+import whatsappInboxRoutes from './routes/whatsappInboxRoutes';
 // import monitoringRoutes from './routes/monitoringRoutes'; // TODO: Fix monitoring service
 // import deadlineRoutes from './routes/deadlineRoutes'; // TODO: Fix deadline service
 // import escavadorRoutes from './routes/escavadorRoutes'; // TODO: Fix escavador service
@@ -72,6 +73,7 @@ app.use('/api/emails', emailRoutes);
 // app.use('/api/notifications', notificationsRoutes); // TODO: Fix notification service
 // app.use('/api/scheduling', schedulingRoutes); // TODO: Fix scheduling service
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/whatsapp-inbox', whatsappInboxRoutes);
 // app.use('/api/monitoring', monitoringRoutes); // TODO: Fix monitoring service
 // app.use('/api/deadlines', deadlineRoutes); // TODO: Fix deadline service
 // app.use('/api/escavador', escavadorRoutes); // TODO: Fix escavador service
